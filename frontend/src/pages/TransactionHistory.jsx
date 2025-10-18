@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import { useUser } from '../context/UserContext'
 
 function categoryIcon(cat){
   switch(cat){
@@ -22,6 +23,7 @@ function initialsFor(user){
 
 export default function TransactionHistory(){
   const [transactions, setTransactions] = useState([])
+  const { user } = useUser();
 
   useEffect(()=>{
     let mounted = true
@@ -51,6 +53,26 @@ export default function TransactionHistory(){
             const toName = t.to ? `${t.to.firstName || ''} ${t.to.lastName || ''}`.trim() : ''
             const fromInitials = initialsFor(t.from)
             const toInitials = initialsFor(t.to)
+              // Determine if current user is sender or receiver
+              const isSender = user && t.from && user._id === t.from._id;
+              const isReceiver = user && t.to && user._id === t.to._id;
+              let amountSign = '';
+              let amountColor = '';
+              if (isSender) {
+                amountSign = '-';
+                amountColor = 'text-red-600';
+              } else if (isReceiver) {
+                amountSign = '+';
+                amountColor = 'text-green-600';
+              } else {
+                amountSign = '';
+                amountColor = 'text-gray-800';
+              }
+            console.log('Current user:', user);
+            console.log('Transaction:', t);
+            console.log('From:', t.from);
+            console.log('To:', t.to);
+            console.log('isSender:', isSender, 'isReceiver:', isReceiver);
             return (
               <div key={t._id} className="border rounded p-3 mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -73,7 +95,10 @@ export default function TransactionHistory(){
                   </div>
                 </div>
                 <div className={`font-semibold text-right ${t.status === 'Success' ? 'text-green-600' : 'text-yellow-600'}`}>
-                  ₹{Number(t.amount).toFixed(2)} <div className="text-sm">{t.status}</div>
+                  <span className={`font-semibold text-right ${amountColor}`}>
+                    {amountSign}₹{Number(t.amount).toFixed(2)}
+                  </span>
+                  <div className="text-sm">{t.status}</div>
                 </div>
               </div>
             )
