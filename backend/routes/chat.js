@@ -6,13 +6,24 @@ const { askGemini } = require('../services/GeminiService'); // ✅ Make sure the
 router.use(express.json());
 
 router.post('/', async (req, res) => {
-  console.log("✅ Chat route hit with body:", req.body); // Logs incoming message
-  const { message } = req.body;
+  const { prompt, transactions } = req.body;
 
-  if (!message) return res.status(400).json({ error: 'Message is required' });
+  if (!prompt || !transactions) return res.status(400).json({ error: 'Prompt and transactions are required' });
 
   try {
-    const reply = await askGemini(message); // ✅ Calls your Gemini AI service
+    const combinedMessage = `
+      You are a smart assistant with access to the user's transactions.
+      The transactions are: ${JSON.stringify(transactions)}
+
+      Instructions:
+      1. If the user asks for transaction details, respond in Markdown with **Date**, **Amount**, **Category**, **Details**, **Status**.
+      2. If the user asks questions like sum, average, largest expense, trends, or anything analytical, answer naturally in plain text.
+      3. Always answer based on the provided transactions only.
+
+      User prompt: ${prompt}
+    `;
+
+    const reply = await askGemini(combinedMessage);
     res.json({ reply });
   } catch (error) {
     console.error("Error in chat route:", error);

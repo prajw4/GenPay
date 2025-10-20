@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { useUser } from '../context/UserContext'
 
-function categoryIcon(cat){
-  switch(cat){
+
+function categoryIcon(cat) {
+  switch (cat) {
     case 'Recharge': return '🔋'
     case 'Food': return '🍔'
     case 'Bills': return '🧾'
@@ -12,8 +13,8 @@ function categoryIcon(cat){
   }
 }
 
-function initialsFor(user){
-  if(!user) return ''
+function initialsFor(user) {
+  if (!user) return ''
   const f = user.firstName || ''
   const l = user.lastName || ''
   const first = f[0] || ''
@@ -21,69 +22,159 @@ function initialsFor(user){
   return (first + last).toUpperCase()
 }
 
-export default function TransactionHistory(){
+export default function TransactionHistory() {
   const [transactions, setTransactions] = useState([])
-  const { user } = useUser();
+  const { user } = useUser()
 
-  useEffect(()=>{
+  const [prompt, setPrompt] = useState('')
+  const [aiResponse, setAiResponse] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleAskAI = async () => {
+    if (!prompt.trim()) return
+    setLoading(true)
+    setAiResponse('')
+
+    try {
+      const res = await api.post('/chat', {
+        prompt,
+        transactions
+      })
+      setAiResponse(res.data.reply || 'No response from AI')
+    } catch (err) {
+      console.error(err)
+      setAiResponse('Oops, something went wrong. Try again!')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     let mounted = true
-    async function load(){
-      try{
+    async function load() {
+      try {
         const res = await api.get('/transactions')
-        if(!mounted) return
+        if (!mounted) return
         setTransactions(res.data.transactions || [])
-      }catch(e){
+      } catch (e) {
         console.error('Failed to load transactions', e)
       }
     }
     load()
-    return ()=> { mounted = false }
+    return () => { mounted = false }
   }, [])
 
   return (
     <div className="m-8">
-      <div className="bg-white rounded p-6 shadow">
+      <div className="bg-white rounded-xl p-6 shadow-lg">
         <h3 className="text-lg font-semibold mb-3">Transactions</h3>
+
+        {/* --- AI Search Bar --- */}
+        <div className="mb-4 p-4 bg-gray-50 rounded-xl shadow-sm">
+          <div className="flex gap-3 items-center">
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Ask AI about your transactions..."
+              className="flex-1 bg-[#f9fafb] rounded-xl px-4 py-2 border border-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:shadow-md transition-all duration-300 ease-in-out"
+              onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
+            />
+            <button
+              onClick={handleAskAI}
+              className="px-6 py-2 font-semibold text-white rounded-xl 
+                         bg-gradient-to-r from-blue-500 to-indigo-500 
+                         shadow-sm hover:shadow-blue-300/50 
+                         hover:from-blue-600 hover:to-indigo-600 
+                         transition-all duration-300 ease-in-out"
+            >
+              {loading ? 'Thinking...' : 'Ask AI'}
+            </button>
+          </div>
+
+          {/* --- AI Response --- */}
+          {loading && <p className="text-gray-500 mt-2">💭 AI is thinking...</p>}
+
+          {aiResponse && (
+            <div className="mt-3 space-y-2">
+              {aiResponse.includes('**Date:**') ? (
+                aiResponse
+                  .split(/\d+\./)
+                  .map(t => t.trim())
+                  .filter(t => t)
+                  .map((t, i) => {
+                    const dateMatch = t.match(/\*\*Date:\*\*\s*([\s\S]*?)(?=\*\*|$)/)
+                    const amountMatch = t.match(/\*\*Amount:\*\*\s*([\d.]+)/)
+                    const categoryMatch = t.match(/\*\*Category:\*\*\s*([^\n*]+)/)
+                    const detailsMatch = t.match(/\*\*Details:\*\*\s*([\s\S]*?)(?=\*\*|$)/)
+                    const statusMatch = t.match(/\*\*Status:\*\*\s*(\w+)/)
+
+                    let dateStr = 'N/A'
+                    if (dateMatch) {
+                      const d = new Date(dateMatch[1].trim())
+                      dateStr = isNaN(d.getTime()) ? dateMatch[1].trim() : d.toLocaleString()
+                    }
+
+                    const amount = amountMatch ? amountMatch[1] : '0'
+                    let categoryRaw = categoryMatch ? categoryMatch[1].trim() : 'Unknown'
+                    let [categoryLabel, categoryEmoji] = categoryRaw.split(' ')
+                    if (!categoryEmoji) categoryEmoji = categoryIcon(categoryLabel)
+
+                    const details = detailsMatch ? detailsMatch[1].trim() : 'N/A'
+                    const status = statusMatch ? statusMatch[1] : 'Unknown'
+
+                    return (
+                      <div key={i} className="p-3 bg-white rounded-lg shadow-sm border-l-4 border-blue-500">
+                        <div><strong>Date:</strong> {dateStr}</div>
+                        <div><strong>Amount:</strong> ₹{amount}</div>
+                        <div><strong>Category:</strong> {categoryLabel} {categoryEmoji}</div>
+                        <div><strong>Details:</strong> {details}</div>
+                        <div><strong>Status:</strong> {status}</div>
+                      </div>
+                    )
+                  })
+              ) : (
+                <div className="p-3 bg-white rounded-lg shadow-sm border-l-4 border-green-500">
+                  {aiResponse}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* --- Transaction Cards --- */}
         {transactions.length === 0 && <div className="text-sm text-gray-500">No transactions yet.</div>}
         <div>
           {transactions.map((t) => {
-            // For now, treat the current user as sender if fromUserId === toUserId (not ideal, but backend doesn't return currentUserId)
-            // We'll show both sender and recipient for clarity
             const fromName = t.from ? `${t.from.firstName || ''} ${t.from.lastName || ''}`.trim() : ''
             const toName = t.to ? `${t.to.firstName || ''} ${t.to.lastName || ''}`.trim() : ''
             const fromInitials = initialsFor(t.from)
             const toInitials = initialsFor(t.to)
-              // Determine if current user is sender or receiver
-              const isSender = user && t.from && user._id === t.from._id;
-              const isReceiver = user && t.to && user._id === t.to._id;
-              let amountSign = '';
-              let amountColor = '';
-              if (isSender) {
-                amountSign = '-';
-                amountColor = 'text-red-600';
-              } else if (isReceiver) {
-                amountSign = '+';
-                amountColor = 'text-green-600';
-              } else {
-                amountSign = '';
-                amountColor = 'text-gray-800';
-              }
-            console.log('Current user:', user);
-            console.log('Transaction:', t);
-            console.log('From:', t.from);
-            console.log('To:', t.to);
-            console.log('isSender:', isSender, 'isReceiver:', isReceiver);
+            const isSender = user && t.from && user._id === t.from._id
+            const isReceiver = user && t.to && user._id === t.to._id
+            let amountSign = ''
+            let amountColor = ''
+            if (isSender) {
+              amountSign = '-'
+              amountColor = 'text-red-600'
+            } else if (isReceiver) {
+              amountSign = '+'
+              amountColor = 'text-green-600'
+            } else {
+              amountSign = ''
+              amountColor = 'text-gray-800'
+            }
+
             return (
-              <div key={t._id} className="border rounded p-3 mb-2 flex items-center justify-between">
+              <div key={t._id} className="border rounded-lg p-3 mb-2 flex items-center justify-between hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4">
-                  {/* Always show recipient avatar for outgoing, sender avatar for incoming */}
                   <div className="h-12 w-12 rounded-full bg-slate-200 flex items-center justify-center font-bold text-lg">
                     {toInitials}
                   </div>
                   <div>
                     <div className="font-medium flex items-center gap-2">
                       <span className="text-3xl align-middle">{categoryIcon(t.category)}</span>
-                      {t.message || 'Transfer'}
+                      {t.category || t.message || 'Transfer'}
                     </div>
                     <div className="text-sm text-gray-500">{new Date(t.date).toLocaleString()}</div>
                     <div className="text-sm text-gray-500">
