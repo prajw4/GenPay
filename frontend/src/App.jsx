@@ -7,6 +7,8 @@ import { Dashboard } from './pages/Dashboard'
 import { SendMoney } from './pages/SendMoney'
 import TransactionHistory from './pages/TransactionHistory'
 import { PrivateRoute } from './components/privateRoute.jsx'
+import AIChat from './components/AIChat.jsx'
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -20,9 +22,16 @@ function App() {
         <Route path="/signup" element={<Signup/>}/>
         <Route path="/signin" element={<Signin/>}/>
 
+        
+
         <Route path='/dashboard' element={
           <PrivateRoute><Dashboard/></PrivateRoute>
         }/>
+
+        <Route path='/chat' element={
+        <PrivateRoute><AIChat/></PrivateRoute>
+        }/>
+
 
         <Route path='/transactions' element={
           <PrivateRoute><TransactionHistory/></PrivateRoute>
