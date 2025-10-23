@@ -12,7 +12,7 @@ export const AppBar = () => {
         navigate('/signin')
     }
 
-    return <div className="shadow h-14 flex justify-between items-center px-4 bg-blue-400">
+    return <div className="shadow h-14 flex justify-between items-center px-4 bg-blue-400 fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center gap-3">
           <div className="font-extrabold text-white text-3xl tracking-wide">GenPay</div>
         </div>

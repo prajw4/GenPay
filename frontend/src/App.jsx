@@ -15,8 +15,8 @@ function App() {
   return (
     <>
      <BrowserRouter>
-      <AppBar />
-      <div className="max-w-4xl mx-auto px-4">
+  <AppBar />
+  <div className="max-w-4xl mx-auto px-4 pt-20 pb-20">
        <Routes>
         <Route path='/' element={<Signup/>} />
         <Route path="/signup" element={<Signup/>}/>

@@ -7,6 +7,7 @@ export default function DashboardInsight() {
   const [insight, setInsight] = useState('');
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -45,21 +46,33 @@ export default function DashboardInsight() {
   );
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 
-                    shadow-md rounded-xl p-4 transition transform hover:scale-105 hover:shadow-lg">
-      <h3 className="text-gray-700 dark:text-gray-200 font-semibold mb-2 flex items-center gap-2">
+  <div className="bg-white rounded p-6 shadow w-full min-h-[200px] max-h-[260px] flex flex-col gap-1 transition-shadow duration-200 hover:shadow-lg">
+      <h3 className="text-gray-700 font-semibold flex items-center gap-2">
         💡 Your AI Expense Insight
       </h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-        {loading ? 'Loading...' : insight}
-      </p>
+      <div className="relative flex-1 min-h-[72px]">
+        <div className={`text-gray-600 text-sm transition-all duration-200 pr-1 ${expanded ? 'max-h-[140px] overflow-y-auto' : 'max-h-[60px] overflow-hidden'}`}>
+          {loading ? 'Loading...' : insight}
+        </div>
+        {!expanded && !loading && insight && insight.length > 0 && (
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+        )}
+      </div>
+      {!loading && insight && insight.length > 0 && (
+        <button
+          onClick={() => setExpanded(prev => !prev)}
+          className="self-start text-xs font-medium text-blue-600 hover:text-blue-700"
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
 
       {stats && (
-        <div className="space-y-2">
+        <div className="space-y-0.5">
           {/* Daily */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium w-12">Daily</span>
-            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div className="bg-blue-500 h-2 rounded-full transition-all" style={{ width: getBarWidth(stats.daily.total, maxTotal) }}></div>
             </div>
             <span className="text-xs font-medium w-16 text-right">₹{stats.daily.total}</span>
@@ -68,7 +81,7 @@ export default function DashboardInsight() {
           {/* Weekly */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium w-12">Weekly</span>
-            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div className="bg-green-500 h-2 rounded-full transition-all" style={{ width: getBarWidth(stats.weekly.total, maxTotal) }}></div>
             </div>
             <span className="text-xs font-medium w-16 text-right">₹{stats.weekly.total}</span>
@@ -77,7 +90,7 @@ export default function DashboardInsight() {
           {/* Monthly */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium w-12">Monthly</span>
-            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div className="bg-purple-500 h-2 rounded-full transition-all" style={{ width: getBarWidth(stats.monthly.total, maxTotal) }}></div>
             </div>
             <span className="text-xs font-medium w-16 text-right">₹{stats.monthly.total}</span>

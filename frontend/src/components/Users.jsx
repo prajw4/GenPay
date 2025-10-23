@@ -33,7 +33,7 @@ export const Users = (props) => {
                 setFilter(e.target.value)
             }} type="text" placeholder="Search users.." className="w-full px-2 py-1 border rounded border-slate-200"></input>
         </div>
-        <div className="max-h-36 overflow-y-auto border rounded bg-white">
+    <div className="max-h-48 overflow-y-auto rounded bg-white shadow">
             {users.map(user => <User key={user._id} user={user} onSelect={props.onSelectUser} />)}
         </div>
     </>

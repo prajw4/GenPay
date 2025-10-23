@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 // AppBar removed per request
-import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
 import userService from '../services/userService'
 import { useNotify } from '../context/NotificationContext'
@@ -161,8 +160,8 @@ export const Dashboard = () =>{
 
     return (
         <div>
-            <div className="m-8">
-                <div className="bg-white rounded p-6 shadow mb-6">
+            <div className="m-8 space-y-6">
+                <div className="bg-white rounded p-6 shadow flex items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
                         <div className="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center text-2xl font-bold">
                             {initials((currentUser?.firstName || '') + ' ' + (currentUser?.lastName || ''))}
@@ -179,10 +178,18 @@ export const Dashboard = () =>{
                             }</div>
                         </div>
                     </div>
+                    <div className="text-right">
+                        <div className="text-sm text-gray-500">Current Balance</div>
+                        <div className="text-3xl font-bold">₹{Number(balance).toLocaleString()}</div>
+                    </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
-                    <div className="bg-white rounded p-6 shadow min-h-[160px] w-80 flex flex-col justify-center transition-all duration-200 hover:shadow-xl hover:bg-blue-50 cursor-pointer">
+                <div className="max-w-3xl">
+                    <DashboardInsight />
+                </div>
+
+                <div className="flex flex-col gap-6">
+                    <div className="bg-white rounded p-6 shadow min-h-[160px] w-full flex flex-col justify-center transition-all duration-200 hover:shadow-xl hover:bg-blue-50 cursor-pointer">
                         <h4 className="text-base text-gray-500 font-medium mb-5">Send Money</h4>
                         <div className="flex gap-2 mb-3">
                             <input value={recipientInput} onChange={e=>setRecipientInput(e.target.value)} placeholder="Enter recipient name or email" className="flex-1 border p-2 rounded" />
@@ -226,22 +233,14 @@ export const Dashboard = () =>{
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4">
-                        <div className="bg-white rounded p-6 shadow min-h-[160px] w-80 flex flex-col justify-center">
-                            <Balance value={balance}></Balance>
-                        </div>
-
-                        {/* AI Insight Card inserted below Balance */}
-                        <DashboardInsight />
+                    <div className="bg-white rounded p-6 shadow w-full">
+                        <h4 className="text-base text-gray-500 font-medium mb-4">People</h4>
+                        <Users excludeUserId={currentUser?._id} onSelectUser={(user) => {
+                            const already = recipients.find(r => r.user && (r.user._id === user._id))
+                            if(already){ push('Recipient already added', 'info'); return }
+                            setRecipients(r => [...r, { name: `${user.firstName} ${user.lastName}`.trim(), user, message: '', amount: 100 }])
+                        }} />
                     </div>
-                </div>
-
-                <div className="mt-2">
-                    <Users excludeUserId={currentUser?._id} onSelectUser={(user) => {
-                        const already = recipients.find(r => r.user && (r.user._id === user._id))
-                        if(already){ push('Recipient already added', 'info'); return }
-                        setRecipients(r => [...r, { name: `${user.firstName} ${user.lastName}`.trim(), user, message: '', amount: 100 }])
-                    }} />
                 </div>
             </div>
         </div>
