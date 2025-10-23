@@ -14,7 +14,8 @@ export default function DashboardInsight() {
     const fetchInsight = async () => {
       try {
         setLoading(true);
-        const res = await api.get('/insights/dashboard'); // backend route
+        // Using the correct API endpoint
+        const res = await api.get('/insights/dashboard');
         setInsight(res.data.insightText);
         setStats(res.data.stats);
       } catch (err) {

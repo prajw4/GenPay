@@ -26,7 +26,8 @@ Include ⚠️ emoji if daily total exceeds ₹1000. Keep it simple and friendly
 // --- Route: GET /api/insights/dashboard ---
 router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id || req.user.id; // from auth middleware
+    const userId = req.userId;
+    console.log("User ID from token:", userId); // from auth middleware
 
     // 1️⃣ Fetch stats
     const stats = await buildDashboardStats(userId);
