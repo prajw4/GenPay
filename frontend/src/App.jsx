@@ -8,6 +8,7 @@ import { SendMoney } from './pages/SendMoney'
 import TransactionHistory from './pages/TransactionHistory'
 import { PrivateRoute } from './components/privateRoute.jsx'
 import AIChat from './components/AIChat.jsx'
+import LoginSuccess from './pages/LoginSuccess.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -20,7 +21,8 @@ function App() {
        <Routes>
         <Route path='/' element={<Signup/>} />
         <Route path="/signup" element={<Signup/>}/>
-        <Route path="/signin" element={<Signin/>}/>
+  <Route path="/signin" element={<Signin/>}/>
+  <Route path="/login/success" element={<LoginSuccess />} />
 
         
 

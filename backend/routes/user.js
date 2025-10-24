@@ -43,6 +43,7 @@ router.post("/signup", async (req, res) => {
         password: hashed,
         firstName,
         lastName,
+        authProvider: 'local'
     });
 
     const userId = user._id;
@@ -84,6 +85,10 @@ router.post("/signin", async(req, res) => {
     const user = await User.findOne({ username: req.body.username });
     if (!user) {
         return res.status(401).json({ message: 'Your credentials do not match. Please try again.' })
+    }
+
+    if (!user.password) {
+        return res.status(400).json({ message: 'This account uses Google sign-in. Please continue with Google.' });
     }
 
     const match = await bcrypt.compare(req.body.password, user.password)

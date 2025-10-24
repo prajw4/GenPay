@@ -6,7 +6,7 @@ import { Button } from "../components/Button"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { useNotify } from '../context/NotificationContext'
-import { useState } from "react"
+import { useState, useMemo } from "react"
 
 export const Signup = () =>{
     const [firstName, setFirstName] = useState("");
@@ -16,6 +16,10 @@ export const Signup = () =>{
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate();
     const { push } = useNotify()
+    const googleAuthUrl = useMemo(()=>{
+        const base = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'
+        return base.replace(/\/$/, '').replace('/api/v1','') + '/api/auth/google'
+    }, [])
 
     return <div className="bg-slate-300 h-screen flex justify-center">
         <div className="flex flex-col justify-center">
@@ -56,6 +60,16 @@ export const Signup = () =>{
                         } finally { setLoading(false) }
                         
                     }} label= {"Sign Up"}></Button>
+                </div>
+                <div className="pt-3">
+                    <button
+                        type="button"
+                        onClick={() => { window.location.href = googleAuthUrl }}
+                        className="w-full inline-flex items-center justify-center gap-2 border border-slate-300 text-slate-700 px-3 py-2 rounded hover:bg-slate-100 transition text-sm font-medium"
+                    >
+                        <span role="img" aria-label="Google">🔐</span>
+                        Continue with Google
+                    </button>
                 </div>
         
             <BottomWarning label={"Already have an account?"} buttonText={"Sign In"} to={"/signin"}></BottomWarning>
