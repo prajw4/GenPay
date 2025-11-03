@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { useState } from 'react'
 import { AppBar } from './components/Appbar'
 import { Signup } from './pages/Signup'
 import { Signin } from './pages/Signin'
@@ -9,10 +8,9 @@ import TransactionHistory from './pages/TransactionHistory'
 import { PrivateRoute } from './components/privateRoute.jsx'
 import AIChat from './components/AIChat.jsx'
 import LoginSuccess from './pages/LoginSuccess.jsx'
+import Help from './pages/Help.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
      <BrowserRouter>
@@ -32,6 +30,10 @@ function App() {
 
         <Route path='/chat' element={
         <PrivateRoute><AIChat/></PrivateRoute>
+        }/>
+
+        <Route path='/help' element={
+          <PrivateRoute><Help/></PrivateRoute>
         }/>
 
 

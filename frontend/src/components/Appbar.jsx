@@ -19,6 +19,7 @@ export const AppBar = () => {
         <div className="flex items-center gap-3">
             <Link to="/dashboard" className="text-white text-sm font-bold px-3 py-1 rounded hover:bg-blue-500 transition">Dashboard</Link>
             <Link to="/transactions" className="text-white text-sm font-bold px-3 py-1 rounded hover:bg-blue-500 transition">Transactions</Link>
+            <Link to="/help" className="text-white text-sm font-bold px-3 py-1 rounded hover:bg-blue-500 transition">Help &amp; Support</Link>
             <button onClick={logout} className="text-sm text-white font-bold">Logout</button>
         </div>
     </div>

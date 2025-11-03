@@ -4,6 +4,7 @@ import { Users } from "../components/Users";
 import userService from '../services/userService'
 import { useNotify } from '../context/NotificationContext'
 import DashboardInsight from '../components/DashboardInsight' // new import for AI insight card
+import { Link } from 'react-router-dom'
 
 export const Dashboard = () =>{
     const [balance, setBalance] = useState(0);
@@ -186,6 +187,14 @@ export const Dashboard = () =>{
 
                 <div className="max-w-3xl">
                     <DashboardInsight />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Link to="/help" className="bg-white rounded p-6 shadow flex flex-col gap-2 hover:shadow-lg hover:bg-blue-50 transition">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-blue-500">Need a hand?</span>
+                        <span className="text-lg font-bold text-slate-900">Talk to the AI Help &amp; Support assistant</span>
+                        <span className="text-sm text-slate-600">Get immediate answers on adding money, tracking payments, and more.</span>
+                    </Link>
                 </div>
 
                 <div className="flex flex-col gap-6">

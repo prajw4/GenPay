@@ -108,8 +108,31 @@ const transactionSchema = mongoose.Schema({
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
+const faqSchema = new mongoose.Schema({
+    question: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    answer: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    tags: [{
+        type: String,
+        trim: true,
+        lowercase: true
+    }]
+}, { timestamps: true });
+
+faqSchema.index({ question: 'text', answer: 'text', tags: 'text' });
+
+const Faq = mongoose.model('Faq', faqSchema);
+
 module.exports = {
     User,
     Account,
-    Transaction
+    Transaction,
+    Faq
 }

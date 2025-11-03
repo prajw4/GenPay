@@ -4,6 +4,7 @@ const accountRouter = require("./account");
 const transactionsRouter = require("./transactions");
 const chatRouter = require("./chat"); 
 const insightRouter = require("./insight")// add this
+const helpRouter = require("./help");
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use("/account", accountRouter);
 router.use("/transactions", transactionsRouter);
 router.use("/chat", chatRouter);
 router.use("/insights",insightRouter) // ✅ mount the insights route
+router.use("/help", helpRouter);
 
 module.exports = router;
