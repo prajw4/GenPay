@@ -4,6 +4,7 @@ import { InputBox } from "../components/InputBox"
 import { SubHeading } from "../components/SubHeading"
 import { Button } from "../components/Button"
 import axios from "axios"
+import api from '../services/api'
 import { useNavigate } from "react-router-dom"
 import { useNotify } from '../context/NotificationContext'
 import { useState, useMemo } from "react"
@@ -42,16 +43,11 @@ export const Signup = () =>{
                     <Button loading={loading} onClick={async()=>{
                         setLoading(true)
                         try{
-                            const response = await axios.post("http://localhost:3000/api/v1/user/signup",{
-                                firstName,
-                                lastName,
-                                username,
-                                password
-                            });
-                            localStorage.setItem("token", response.data.token);
-                            localStorage.setItem("user", JSON.stringify(response.data.user));
+                            const response = await api.post('/user/signup', { firstName, lastName, username, password })
+                            const user = response.data.user
+                            if(user) localStorage.setItem('user', JSON.stringify(user))
                             push('Signed up', 'success')
-                            navigate("/dashboard")
+                            navigate('/dashboard')
                             
                         }catch (err){
                             console.error("Signup Failed", err)

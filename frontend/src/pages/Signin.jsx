@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useMemo } from 'react';
 import axios from "axios";
 import { useNotify } from '../context/NotificationContext'
+import api from '../services/api'
 
 export const Signin = () => {
   const [username, setUsername] = useState("");
@@ -38,16 +39,13 @@ export const Signin = () => {
     onClick={async () => {
     setLoading(true)
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/user/signin",
-        { username, password },
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const response = await api.post('/user/signin', { username, password })
+      const user = response.data.user
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user))
+      }
       push('Signed in', 'success')
-      navigate("/dashboard");
+      navigate('/dashboard')
     } catch (error) {
       console.warn('Signin failed', error)
       const message = error?.response?.data?.message || 'Signin failed — check your credentials'

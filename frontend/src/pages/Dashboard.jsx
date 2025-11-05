@@ -19,12 +19,12 @@ export const Dashboard = () =>{
 
     useEffect(()=>{
         // fetch balance and current user and users list
-        const token = localStorage.getItem('token')
         async function init(){
             try{
                 // fetch balance (best-effort)
                 try{
-                    const balRes = await fetch('http://localhost:3000/api/v1/account/balance', { headers: { Authorization: 'Bearer ' + token } })
+                    // API client will send cookies (JWT) with request
+                    const balRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/account/balance`, { credentials: 'include' })
                     if(balRes.ok){
                         const json = await balRes.json()
                         setBalance(json.balance || 0)
@@ -90,7 +90,7 @@ export const Dashboard = () =>{
         if(!isValidRecipient){ push('Invalid recipient selected', 'error'); return }
 
         // sufficient balance check
-        if(amount > Number(balance)){ push('Insufficient balance', 'error'); setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Failed'} : item)); return }
+    if(amount > Number(balance)){ push('Insufficient balance', 'error'); setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Failed'} : item)); return }
         const tx = {
             fromUserId: currentUser._id || currentUser.id || null,
             toUserId,
@@ -106,13 +106,11 @@ export const Dashboard = () =>{
 
         // if recipient user is known, call backend transfer
         if(toUserId){
-            try{
-                const res = await fetch('http://localhost:3000/api/v1/account/transfer', {
+                try{
+                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/account/transfer`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ to: toUserId, amount, category: r.category || 'Transfer', message: r.message || '' })
                 })
                 const data = await res.json()
@@ -131,9 +129,7 @@ export const Dashboard = () =>{
 
                 // defensive: re-fetch balance from server to ensure sync
                 try{
-                    const re = await fetch('http://localhost:3000/api/v1/account/balance', {
-                        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-                    })
+                    const re = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/account/balance`, { credentials: 'include' })
                     if(re.ok){
                         const jb = await re.json()
                         setBalance(Number(jb.balance) || jb.balance)

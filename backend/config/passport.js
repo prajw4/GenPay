@@ -51,7 +51,7 @@ if (hasGoogleCredentials) {
         });
         await Account.create({
           userId: existingUser._id,
-          balance: 0
+          balance: 50000
         });
       } else {
         let shouldUpdate = false;

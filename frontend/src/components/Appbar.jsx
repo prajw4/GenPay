@@ -1,13 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { useNotify } from '../context/NotificationContext'
+import api from '../services/api'
 
 export const AppBar = () => {
     const navigate = useNavigate()
     const { push } = useNotify()
 
     function logout(){
-        localStorage.removeItem('token')
+        // call backend to clear cookie
+        api.post('/user/logout').catch(()=>{})
+        localStorage.removeItem('user')
         push('Logged out', 'info')
         navigate('/signin')
     }

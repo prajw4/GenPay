@@ -150,15 +150,15 @@ export default function TransactionHistory() {
             const toName = t.to ? `${t.to.firstName || ''} ${t.to.lastName || ''}`.trim() : ''
             const fromInitials = initialsFor(t.from)
             const toInitials = initialsFor(t.to)
-            const isSender = user && t.from && user._id === t.from._id
-            const isReceiver = user && t.to && user._id === t.to._id
+            const isSender = user && t.from && String(user._id) === String(t.from._id)
+            const isReceiver = user && t.to && String(user._id) === String(t.to._id)
             let amountSign = ''
             let amountColor = ''
             if (isSender) {
               amountSign = '-'
               amountColor = 'text-red-600'
             } else if (isReceiver) {
-              amountSign = '+'
+              amountSign = ''
               amountColor = 'text-green-600'
             } else {
               amountSign = ''
@@ -187,7 +187,7 @@ export default function TransactionHistory() {
                 </div>
                 <div className={`font-semibold text-right ${t.status === 'Success' ? 'text-green-600' : 'text-yellow-600'}`}>
                   <span className={`font-semibold text-right ${amountColor}`}>
-                    {amountSign}₹{Number(t.amount).toFixed(2)}
+                    {isSender ? amountSign : ''}₹{Number(t.amount).toFixed(2)}
                   </span>
                   <div className="text-sm">{t.status}</div>
                 </div>

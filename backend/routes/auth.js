@@ -27,8 +27,15 @@ router.get(
   (req, res) => {
     try {
       const token = issueJwtForUser(req.user);
+      const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 3600000
+      }
+
+      res.cookie('token', token, cookieOptions)
       const redirectUrl = new URL(`${clientRedirectUrl.replace(/\/$/, '')}/login/success`);
-      redirectUrl.searchParams.set('token', token);
       res.redirect(redirectUrl.toString());
     } catch (err) {
       console.error('Failed to issue JWT for Google user', err);

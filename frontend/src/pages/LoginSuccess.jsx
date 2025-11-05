@@ -11,17 +11,6 @@ export default function LoginSuccess(){
   const { push } = useNotify()
 
   useEffect(()=>{
-    const params = new URLSearchParams(location.search)
-    const token = params.get('token')
-
-    if(!token){
-      push('Missing login token from Google.', 'error')
-      navigate('/signin', { replace: true })
-      return
-    }
-
-    localStorage.setItem('token', token)
-
     async function hydrateUser(){
       try{
         const res = await api.get('/user/me')

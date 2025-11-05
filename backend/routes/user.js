@@ -50,16 +50,21 @@ router.post("/signup", async (req, res) => {
     
     await Account.create({
         userId,
-        balance: 1 + Math.random() * 10000
+        balance: 50000
     })
 
-    const token = jwt.sign({
-        userId
-    }, JWT_SECRET);
+    const token = jwt.sign({ userId }, JWT_SECRET);
 
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 3600000
+    }
+
+    res.cookie('token', token, cookieOptions)
     res.json({
-        message: "User created successfully",
-        token: token,
+        message: 'User created successfully',
         user: {
             _id: user._id,
             username: user.username,
@@ -97,8 +102,15 @@ router.post("/signin", async(req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET)
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: 3600000
+    }
+
+    res.cookie('token', token, cookieOptions)
     res.json({
-        token,
         user: {
             _id: user._id,
             username: user.username,
@@ -116,6 +128,16 @@ router.get('/me', authMiddleware, async (req, res) => {
         res.json({ user })
     }catch(err){
         res.status(500).json({ message: 'Server error' })
+    }
+})
+
+router.post('/logout', authMiddleware, async (req, res) => {
+    try{
+        res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' })
+        res.json({ message: 'Logged out' })
+    }catch(err){
+        console.error('Logout failed', err)
+        res.status(500).json({ message: 'Logout failed' })
     }
 })
 

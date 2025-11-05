@@ -101,3 +101,27 @@ npm run dev
 
 After starting, the frontend will run by default on:
 http://localhost:5173
+
+---
+
+## 📦 Deploying to Render (single service)
+
+You can deploy the whole project as a single service on Render. The root `package.json` contains scripts to build the frontend and start the backend.
+
+Recommended Render settings:
+- Build Command: npm run build
+- Start Command: npm start
+- Root directory: repository root (where this README and root package.json live)
+
+Required environment variables (set these in the Render dashboard):
+- MONGO_URI — MongoDB Atlas connection string
+- GOOGLE_CLIENT_ID — Google OAuth client id
+- GOOGLE_CLIENT_SECRET — Google OAuth client secret
+- JWT_SECRET — secret used to sign JWT tokens
+- PORT — optional, Render provides a port automatically
+
+Notes:
+- The build step runs `cd frontend && npm install && npm run build` which produces the production files in `frontend/dist`.
+- The backend (`backend/server.js`) serves the static files and mounts API routes under `/api/v1`.
+- Ensure `FRONTEND_ORIGIN` is set if you want to restrict CORS to a specific origin. During Render deployment the server and client will be served from the same origin so relative API URLs will work.
+

@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router-dom"
 import axios from "axios";
+import api from '../services/api'
 import { useState } from "react";
 import { useNotify } from '../context/NotificationContext'
 export const SendMoney = () => {
@@ -46,14 +47,7 @@ export const SendMoney = () => {
                     <button onClick={async ()=>{
                         setLoading(true)
                         try{
-                            await axios.post("http://localhost:3000/api/v1/account/transfer",{
-                                to: id,
-                                amount
-                            },{
-                                headers: {
-                                    Authorization: "Bearer " + localStorage.getItem("token")
-                                }
-                            })
+                            await api.post('/account/transfer', { to: id, amount })
                             push('Transfer initiated', 'success')
                         }catch(err){
                             console.error('Transfer failed', err)
