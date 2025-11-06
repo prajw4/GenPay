@@ -32,8 +32,6 @@ app.use(passport.initialize());
 app.use("/api/v1",mainRouter);
 app.use('/api/auth', authRouter);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT,()=>{
-    console.log(`Server is running on ${PORT}`)
-})
+// For serverless environments (Vercel) we export the app instance instead of
+// starting a listener here. The platform will call the exported app.
+module.exports = app;
