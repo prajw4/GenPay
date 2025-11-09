@@ -35,7 +35,8 @@ router.get(
       }
 
       res.cookie('token', token, cookieOptions)
-      const redirectUrl = new URL(`${clientRedirectUrl.replace(/\/$/, '')}/login/success`);
+      const redirectUrl = new URL(`${clientRedirectUrl.replace(/\/$/, '')}/dashboard`);
+
       res.redirect(redirectUrl.toString());
     } catch (err) {
       console.error('Failed to issue JWT for Google user', err);
