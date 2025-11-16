@@ -9,39 +9,39 @@ const authRouter = require('./routes/auth');
 
 const app = express();
 
-// 🌐 Allowed frontend origins
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
-
-// allow frontend dev server (Vite) by default on 5173 and any FRONTEND_ORIGIN env value
-const defaultAllowed = [FRONTEND_ORIGIN, 'http://localhost:5173'];
-const allowedOrigins = (process.env.FRONTEND_ORIGIN || '')
-  .split(',')
-  .map(s => s.trim())
-  .filter(Boolean)
-  .concat(defaultAllowed)
-  .filter((v, i, a) => a.indexOf(v) === i);
+// Allowed origins
+const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN,  // your deployed vercel frontend
+  "http://localhost:5173",       // Vite dev
+  "http://localhost:3000"        // React dev
+].filter(Boolean);
 
 app.use(express.json());
 app.use(cookieParser());
+
 app.use(cors({
-  origin: function (origin, cb) {
-    // allow requests with no origin (like mobile apps or curl)
-    if (!origin) return cb(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) return cb(null, true);
-    console.warn('[CORS] Blocking origin:', origin);
-    return cb(new Error('Not allowed by CORS'), false);
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn("[CORS] Blocked:", origin);
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true
 }));
 
 app.use(passport.initialize());
 
-// 🧩 Routers
-app.use("/api/v1", mainRouter);
-app.use('/api/auth', authRouter);
+// Health check route (Render needs this)
+app.get("/", (req, res) => {
+  res.send("Backend is running 🎉");
+});
 
-// ⚙️ Port Configuration for Render
-const PORT = process.env.PORT; // ✅ no fallback
-app.listen(PORT, '0.0.0.0', () => {
+// Main routes
+app.use("/api/v1", mainRouter);
+app.use("/api/auth", authRouter);
+
+// Port setup — works locally + on Render
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server is running on port ${PORT}`);
 });
