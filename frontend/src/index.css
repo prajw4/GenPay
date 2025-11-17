@@ -1,5 +1,8 @@
-@import "tailwindcss";
+@import "tailwindcss/preflight";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
+/* Keep existing custom styles below */
 html, body, #root {
 	height: 100%;
 }
