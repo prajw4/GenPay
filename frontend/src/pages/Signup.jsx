@@ -18,8 +18,9 @@ export const Signup = () =>{
     const navigate = useNavigate();
     const { push } = useNotify()
     const googleAuthUrl = useMemo(()=>{
-        const base = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'
-        return base.replace(/\/$/, '').replace('/api/v1','') + '/api/auth/google'
+        const apiBase = import.meta.env.VITE_API_URL ?? '/api/v1'
+        const origin = apiBase.startsWith('http') ? apiBase.replace(/\/$/, '').replace('/api/v1','') : window.location.origin
+        return origin + '/api/auth/google'
     }, [])
 
     return <div className="bg-slate-300 h-screen flex justify-center">
