@@ -1,6 +1,6 @@
-@import "tailwindcss/preflight";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+/* Import Tailwind's compiled index which includes preflight, theme, components, and utilities
+	This avoids importing a non-existent "components" specifier in Tailwind v4's package exports. */
+@import "tailwindcss/index.css";
 
 /* Keep existing custom styles below */
 html, body, #root {
