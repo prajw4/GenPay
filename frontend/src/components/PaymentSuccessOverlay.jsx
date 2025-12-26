@@ -7,7 +7,7 @@ const PaymentSuccessOverlay = ({ visible, message = 'Money Sent Successfully' })
   return (
     <div className="ps-overlay">
       <div className="ps-content">
-        <svg className="ps-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <svg className="ps-svg max-w-[136px] sm:max-w-[160px] h-auto" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
           <g className="ps-anim">
             <circle className="ps-circle" cx="60" cy="60" r="38" fill="none" strokeWidth="6" />
             <path
@@ -20,7 +20,7 @@ const PaymentSuccessOverlay = ({ visible, message = 'Money Sent Successfully' })
             />
           </g>
         </svg>
-        <div className="ps-text">{message}</div>
+        <div className="ps-text text-sm sm:text-base px-4 text-center">{message}</div>
       </div>
     </div>
   )

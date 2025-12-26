@@ -19,24 +19,24 @@ export const Signup = () => {
     }, [])
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 flex items-center justify-center p-4 py-6 sm:py-8">
+            <div className="w-full max-w-sm sm:max-w-md">
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl mb-4 shadow-lg">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center mb-6 sm:mb-8">
+                    <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl mb-3 sm:mb-4 shadow-lg">
+                        <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-900">Create Account</h1>
-                    <p className="text-slate-500 mt-1">Join thousands of users today</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Create Account</h1>
+                    <p className="text-slate-500 mt-1 text-xs sm:text-sm">Join thousands of users today</p>
                 </div>
 
                 {/* Card */}
-                <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8">
-                    <div className="space-y-5">
+                <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8">
+                    <div className="space-y-4 sm:space-y-5">
                         {/* Name Row */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-700">First Name</label>
                                 <input
@@ -116,7 +116,7 @@ export const Signup = () => {
                                 }
                             }}
                             disabled={loading}
-                            className="w-full h-12 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-slate-800 text-white font-semibold rounded-xl shadow-lg shadow-slate-300/30 hover:shadow-slate-400/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full h-11 sm:h-12 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-slate-800 text-white font-semibold text-sm sm:text-base rounded-xl shadow-lg shadow-slate-300/30 hover:shadow-slate-400/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -149,7 +149,7 @@ export const Signup = () => {
                         {/* Google Button */}
                         <button
                             onClick={() => { window.location.href = googleAuthUrl }}
-                            className="w-full h-12 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition-all duration-200 flex items-center justify-center gap-3"
+                            className="w-full h-11 sm:h-12 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-medium text-sm sm:text-base rounded-xl transition-all duration-200 flex items-center justify-center gap-3"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -162,8 +162,8 @@ export const Signup = () => {
                     </div>
 
                     {/* Sign In Link */}
-                    <div className="mt-6 text-center">
-                        <p className="text-slate-600">
+                    <div className="mt-5 sm:mt-6 text-center">
+                        <p className="text-xs sm:text-sm text-slate-600">
                             Already have an account?{' '}
                             <button
                                 onClick={() => navigate('/signin')}
@@ -176,7 +176,7 @@ export const Signup = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-6 text-center">
+                <div className="mt-5 sm:mt-6 text-center">
                     <p className="text-xs text-slate-400 flex items-center justify-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

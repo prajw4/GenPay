@@ -228,42 +228,42 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+    <div className="min-h-screen bg-slate-50 pt-20 pb-10">
+      <div className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-5">
 
         {/* 🔝 BALANCE HERO */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center text-xl font-bold text-blue-600">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-slate-200">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5">
+            <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-blue-100 flex items-center justify-center text-lg sm:text-xl font-bold text-blue-600 flex-shrink-0">
               {initials(`${currentUser?.firstName} ${currentUser?.lastName}`)}
             </div>
-            <div className="flex-1">
-              <div className="text-lg font-semibold text-gray-900">
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold text-slate-900 truncate">
                 {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Guest'}
               </div>
-              <div className="text-sm text-gray-500">Welcome back 👋</div>
+              <div className="text-xs sm:text-sm text-slate-500">Welcome back 👋</div>
             </div>
           </div>
 
-          <div className="bg-blue-600 rounded-lg p-4 mb-5">
-            <div className="text-sm text-blue-100">Available Balance</div>
-            <div className="text-3xl font-bold text-white">
+          <div className="bg-blue-600 rounded-lg p-3 sm:p-4 mb-4 sm:mb-5">
+            <div className="text-xs sm:text-sm text-blue-100">Available Balance</div>
+            <div className="text-2xl sm:text-3xl font-bold text-white">
               ₹{balance.toLocaleString('en-IN')}
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-xs text-gray-500 mb-1">Sent</div>
-              <div className="font-semibold text-red-600">₹{totalSent.toLocaleString('en-IN')}</div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-slate-50 rounded-lg p-2 sm:p-3 text-center">
+              <div className="text-xs text-slate-500 mb-1">Sent</div>
+              <div className="font-semibold text-xs sm:text-sm text-red-600">₹{totalSent.toLocaleString('en-IN')}</div>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-xs text-gray-500 mb-1">Received</div>
-              <div className="font-semibold text-green-600">₹{totalReceived.toLocaleString('en-IN')}</div>
+            <div className="bg-slate-50 rounded-lg p-2 sm:p-3 text-center">
+              <div className="text-xs text-slate-500 mb-1">Received</div>
+              <div className="font-semibold text-xs sm:text-sm text-green-600">₹{totalReceived.toLocaleString('en-IN')}</div>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-xs text-gray-500 mb-1">Transactions</div>
-              <div className="font-semibold text-gray-800">{totalTransactions}</div>
+            <div className="bg-slate-50 rounded-lg p-2 sm:p-3 text-center">
+              <div className="text-xs text-slate-500 mb-1">Txns</div>
+              <div className="font-semibold text-xs sm:text-sm text-slate-800">{totalTransactions}</div>
             </div>
           </div>
         </div>
@@ -274,53 +274,53 @@ export const Dashboard = () => {
         {/* 🧠 HELP */}
         <Link 
           to="/help" 
-          className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+          className="flex items-center gap-3 sm:gap-4 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all"
         >
-          <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-50 flex items-center justify-center text-lg flex-shrink-0">
             🤖
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900">AI Help & Support</h3>
-            <p className="text-sm text-gray-500">Ask GenPay about your spending & payments</p>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm sm:text-base text-slate-900">AI Help</h3>
+            <p className="text-xs sm:text-sm text-slate-500 line-clamp-1">Ask GenPay about your spending</p>
           </div>
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </Link>
 
         {/* 💸 SEND MONEY */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+          <h4 className="font-semibold text-sm sm:text-base text-slate-900 mb-4 flex items-center gap-2">
             <span className="text-lg">💸</span> Send Money
           </h4>
 
-          <div className="flex gap-2 mb-4 relative">
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <div className="flex-1 relative">
               <input
                 value={recipientInput}
                 onChange={e => setRecipientInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSendMoneyClick()}
                 placeholder="Enter recipient name"
-                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 autoComplete="off"
               />
               
               {/* Search Dropdown */}
               {recipientInput && getFilteredSearchUsers().length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-10 max-h-48 sm:max-h-60 overflow-y-auto">
                   {getFilteredSearchUsers().map(user => (
                     <button
                       key={user._id}
                       onClick={() => selectUserFromDropdown(user)}
-                      className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-left transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-left transition-colors"
                       type="button"
                     >
                       <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center font-medium text-blue-600 flex-shrink-0 text-xs">
                         {initials(`${user.firstName} ${user.lastName}`)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 text-sm">{user.firstName} {user.lastName}</div>
-                        <div className="text-xs text-gray-500">@{user.username}</div>
+                        <div className="font-medium text-slate-900 text-xs sm:text-sm">{user.firstName} {user.lastName}</div>
+                        <div className="text-xs text-slate-500">@{user.username}</div>
                       </div>
                     </button>
                   ))}
@@ -330,68 +330,21 @@ export const Dashboard = () => {
             
             <button 
               onClick={handleSendMoneyClick}
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-medium transition-colors"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg font-medium text-xs sm:text-sm transition-colors whitespace-nowrap"
             >
               Send Money
             </button>
           </div>
-
-          {recipients.map((r, i) => (
-            <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3">
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center font-medium text-blue-600">
-                    {initials(r.name)}
-                  </div>
-                  <span className="font-semibold text-gray-900">{r.name}</span>
-                </div>
-                <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-300 px-2">
-                  <span className="text-gray-500">₹</span>
-                  <input
-                    type="number"
-                    value={r.amount}
-                    onChange={e => updateRecipient(i, { amount: e.target.value })}
-                    className="w-20 py-2 bg-transparent text-gray-900 focus:outline-none text-right font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 mb-3">
-                <input
-                  placeholder="Add a message (optional)"
-                  value={r.message}
-                  onChange={e => updateRecipient(i, { message: e.target.value })}
-                  className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={r.category}
-                  onChange={e => updateRecipient(i, { category: e.target.value })}
-                  className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option>Transfer</option>
-                  <option>Food</option>
-                  <option>Bills</option>
-                </select>
-              </div>
-
-              <button
-                onClick={() => sendToRecipient(i)}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"
-              >
-                Send ₹{Number(r.amount).toLocaleString('en-IN')}
-              </button>
-            </div>
-          ))}
         </div>
 
-        {/* 👥 PEOPLE */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        {/* 👥 PEOPLE - Frequent Recipients */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+          <h4 className="font-semibold text-sm sm:text-base text-slate-900 mb-4 flex items-center gap-2">
             <span className="text-lg">👥</span> Frequent Recipients
           </h4>
           
-          {/* 3x2 Grid Layout */}
-          <div className="grid grid-cols-3 gap-8 mb-4">
+          {/* Responsive Grid: 2 cols on mobile, 3 cols on tablet, 4+ on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-4">
             {getPaginatedFrequentRecipients().map((user, index) => (
               <button
                 key={user._id}
@@ -400,10 +353,10 @@ export const Dashboard = () => {
                 }}
                 className="flex flex-col items-center gap-2 group"
               >
-                <div className={`h-14 w-14 rounded-full flex items-center justify-center font-semibold text-sm group-hover:shadow-md transition-shadow ${getUserColor(frequentPage * 6 + index)}`}>
+                <div className={`h-12 sm:h-14 w-12 sm:w-14 rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm group-hover:shadow-md transition-shadow ${getUserColor(frequentPage * 6 + index)}`}>
                   {initials(`${user.firstName} ${user.lastName}`)}
                 </div>
-                <span className="text-xs font-medium text-gray-700 text-center max-w-[60px] truncate group-hover:text-gray-900">
+                <span className="text-xs font-medium text-slate-700 text-center max-w-[70px] line-clamp-2 group-hover:text-slate-900">
                   {user.firstName}
                 </span>
               </button>
@@ -414,7 +367,7 @@ export const Dashboard = () => {
           {hasMoreFrequentRecipients() && (
             <button
               onClick={() => setFrequentPage(frequentPage + 1)}
-              className="w-full py-2 px-4 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="w-full py-2 px-4 text-xs sm:text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             >
               More Recipients →
             </button>
@@ -424,7 +377,7 @@ export const Dashboard = () => {
           {frequentPage > 0 && (
             <button
               onClick={() => setFrequentPage(frequentPage - 1)}
-              className="w-full py-2 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              className="w-full py-2 px-4 text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
             >
               ← Show Fewer
             </button>

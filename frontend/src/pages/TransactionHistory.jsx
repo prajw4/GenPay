@@ -70,19 +70,19 @@ export default function TransactionHistory() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="px-4 py-8 sm:px-6 lg:px-8 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-slate-50 pt-20 pb-10">
+      <div className="px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-xl font-semibold text-slate-800 tracking-tight">Transaction History</h1>
-          <p className="text-xs text-slate-400 mt-1 tracking-wide uppercase">Your recent activity</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-800 tracking-tight">Transaction History</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 tracking-wide uppercase">Your recent activity</p>
         </div>
 
         {/* --- AI Search Bar --- */}
-        <div className="mb-8">
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-            <div className="flex items-center gap-3">
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-3">
               <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -93,13 +93,13 @@ export default function TransactionHistory() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Ask AI about your spending..."
-                className="flex-1 text-sm text-slate-700 placeholder-slate-300 bg-transparent border-none outline-none"
+                className="flex-1 text-xs sm:text-sm text-slate-700 placeholder-slate-300 bg-transparent border-none outline-none w-full"
                 onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
               />
               <button
                 onClick={handleAskAI}
                 disabled={loading}
-                className="px-4 py-2 text-xs font-semibold text-white rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-white rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all disabled:opacity-50 whitespace-nowrap"
               >
                 {loading ? '...' : 'Ask'}
               </button>

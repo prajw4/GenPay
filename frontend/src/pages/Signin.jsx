@@ -24,21 +24,21 @@ export const Signin = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-6 sm:py-8">
+      <div className="w-full max-w-sm sm:max-w-md">
         {/* Logo / Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-500 rounded-2xl mb-4 shadow-lg shadow-emerald-500/20">
-            <span className="text-2xl text-white font-bold">G</span>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-emerald-500 rounded-2xl mb-3 sm:mb-4 shadow-lg shadow-emerald-500/20">
+            <span className="text-xl sm:text-2xl text-white font-bold">G</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
-          <p className="text-slate-500 mt-1 text-sm">Sign in to continue to GenPay</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Welcome back</h1>
+          <p className="text-slate-500 mt-1 text-xs sm:text-sm">Sign in to continue to GenPay</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8">
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 sm:p-8">
           {/* Form Fields */}
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             <InputBox 
               onChange={(e) => {
                 setUsername(e.target.value);
@@ -63,7 +63,7 @@ export const Signin = () => {
           </div>
 
           {/* Sign In Button */}
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             <button
               onClick={async () => {
                 setLoading(true)
@@ -84,7 +84,7 @@ export const Signin = () => {
                 }
               }}
               disabled={loading}
-              className="w-full h-12 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-slate-800/20"
+              className="w-full h-11 sm:h-12 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-slate-800/20"
             >
               {loading ? (
                 <>
