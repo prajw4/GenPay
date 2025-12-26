@@ -42,6 +42,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
 // optional: list transactions for current user (from or to)
 router.get('/', authMiddleware, async (req, res) => {
+    const {limit , offset} = req.query
     try {
         const txs = await Transaction.find({
             $or: [ { fromUserId: req.userId }, { toUserId: req.userId } ]
@@ -69,3 +70,5 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+

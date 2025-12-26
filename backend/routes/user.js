@@ -53,15 +53,17 @@ router.post("/signup", async (req, res) => {
         balance: 50000
     })
 
-    const token = jwt.sign({ userId }, JWT_SECRET);
+    const token = jwt.sign({ userId: String(userId) }, JWT_SECRET);
 
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
-        path: '/',
-        maxAge: 3600000
-    }
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            // Local-friendly SameSite; using 'Lax' works for same-site navigation and
+            // for proxied dev servers. We restore 'Lax' to match pre-deployment defaults.
+            sameSite: 'Lax',
+            path: '/',
+            maxAge: 3600000
+        }
 
     res.cookie('token', token, cookieOptions)
     res.json({
@@ -107,7 +109,7 @@ router.post("/signin", async(req, res) => {
         return res.status(401).json({ message: 'Your credentials do not match. Please try again.' })
     }
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET)
+    const token = jwt.sign({ userId: String(user._id) }, JWT_SECRET)
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -141,7 +143,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 router.post('/logout', authMiddleware, async (req, res) => {
     try{
         // Clear cookie using the same attributes used when setting it
-        res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Lax', path: '/' })
+            res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Lax', path: '/' })
         res.json({ message: 'Logged out' })
     }catch(err){
         console.error('Logout failed', err)

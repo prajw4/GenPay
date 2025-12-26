@@ -12,6 +12,13 @@ if (!mongoUri) {
 }
 
 mongoose.connect(mongoUri)
+    .then(() => {
+        console.log('✅ MongoDB connected successfully');
+    })
+    .catch((err) => {
+        console.error('❌ MongoDB connection failed:', err.message);
+        process.exit(1);
+    });
 
 
 const userSchema =  mongoose.Schema({

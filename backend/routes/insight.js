@@ -46,6 +46,11 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
       insightText = `Summary: Today you spent ₹${stats.daily.total}. This week: ₹${stats.weekly.total}. This month: ₹${stats.monthly.total}.`;
     }
 
+    // If Gemini returned a generic error message, fallback to deterministic summary
+    if (!insightText || insightText.startsWith('Sorry, something went wrong') || insightText.includes('AI insights are unavailable')) {
+      insightText = `Summary: Today you spent ₹${stats.daily.total}. This week: ₹${stats.weekly.total}. This month: ₹${stats.monthly.total}.`;
+    }
+
     // 4️⃣ Return response
     res.json({
       insightText,

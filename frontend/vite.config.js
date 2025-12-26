@@ -7,4 +7,17 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    // Proxy API calls to the backend during local development so the dev server
+    // and API appear same-origin. This restores the classic local dev flow and
+    // avoids cross-site cookie/SameSite issues.
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
+  },
 })

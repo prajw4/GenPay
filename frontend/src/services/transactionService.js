@@ -1,12 +1,12 @@
 import api from './api'
 
 export default {
-  async getTransactions(){
-    const res = await api.get('/account/transactions')
+  async list(){
+    const res = await api.get('/transactions')
     return res.data.transactions || []
   },
-  async createTransaction(payload){
-    const res = await api.post('/account/transaction', payload)
-    return res.data
+  async create(payload){
+    const res = await api.post('/transactions', payload)
+    return res.data.transaction
   }
 }

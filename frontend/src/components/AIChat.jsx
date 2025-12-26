@@ -17,8 +17,8 @@ const AIChat = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/chat", {
-        message: input,
+      const res = await axios.post("/api/v1/chat", {
+      message: input,
       });
       const aiReply = { sender: "ai", text: res.data.reply };
       setMessages((prev) => [...prev, aiReply]);

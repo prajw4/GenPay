@@ -37,15 +37,15 @@ async function getDailyStats(userId, date = new Date()) {
   const start = startOfDay(date);
   const end = endOfDay(date);
 
-  // Total spent today
+  // Total spent today (only successful transactions)
   const totalAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, status: 'Success' } },
     { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }
   ]);
 
-  // Category breakdown
+  // Category breakdown (only successful transactions)
   const categoryAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, status: 'Success' } },
     { $group: { _id: "$category", total: { $sum: "$amount" } } },
     { $sort: { total: -1 } },
   ]);
@@ -65,12 +65,12 @@ async function getWeeklyStats(userId, refDate = new Date()) {
   const end = endOfDay(refDate);
 
   const totalAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, status: 'Success' } },
     { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }
   ]);
 
   const categoryAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, status: 'Success' } },
     { $group: { _id: "$category", total: { $sum: "$amount" } } },
     { $sort: { total: -1 } }
   ]);
@@ -81,7 +81,7 @@ async function getWeeklyStats(userId, refDate = new Date()) {
   prevEnd.setMilliseconds(-1);
 
   const prevAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: prevStart, $lte: prevEnd } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: prevStart, $lte: prevEnd }, status: 'Success' } },
     { $group: { _id: null, total: { $sum: "$amount" } } }
   ]);
 
@@ -106,18 +106,18 @@ async function getMonthlyStats(userId, refDate = new Date()) {
   const end = endOfMonth(refDate);
 
   const totalAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, status: 'Success' } },
     { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }
   ]);
 
   const categoryAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, status: 'Success' } },
     { $group: { _id: "$category", total: { $sum: "$amount" } } },
     { $sort: { total: -1 } }
   ]);
 
   const receiverAgg = await Transaction.aggregate([
-    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, toUserId: { $exists: true, $ne: null } } },
+    { $match: { fromUserId: new mongoose.Types.ObjectId(userId), date: { $gte: start, $lte: end }, toUserId: { $exists: true, $ne: null }, status: 'Success' } },
     { $group: { _id: "$toUserId", total: { $sum: "$amount" }, count: { $sum: 1 } } },
     { $sort: { total: -1 } },
     { $limit: 3 }

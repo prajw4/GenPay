@@ -1,0 +1,67 @@
+/* Full-screen overlay */
+.ps-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45); /* slate-900/45 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: saturate(140%) blur(2px);
+}
+
+.ps-content {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 36px 26px;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.18), 0 8px 16px rgba(2, 6, 23, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: ps-pop 600ms cubic-bezier(0.22, 1, 0.36, 1) 900ms both;
+}
+
+.ps-svg {
+  width: 136px;
+  height: 136px;
+  display: block;
+}
+
+/* Use CSS custom properties for colors */
+.ps-circle,
+.ps-check {
+  stroke: #10b981; /* emerald-500 */
+}
+
+/* Circle draw animation using normalized path length */
+.ps-circle {
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: ps-draw 800ms ease-out forwards;
+}
+
+/* Checkmark draw with slight delay */
+.ps-check {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: ps-draw 500ms ease-out 450ms forwards;
+}
+
+/* Wrapper bounce/pop after strokes complete */
+@keyframes ps-pop {
+  0% { transform: scale(0.94); }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ps-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.ps-text {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a; /* slate-900 */
+}

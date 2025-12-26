@@ -12,15 +12,12 @@ const {
   CLIENT_REDIRECT_URL,
 } = process.env;
 
-// Determine environment
-const isProduction = NODE_ENV === 'production';
-
-// Define backend and frontend URLs
-const backendBaseUrl = isProduction
-  ? 'https://genpay-2.onrender.com'
-  : 'http://localhost:3000';
-
-const googleCallbackUrl = `${backendBaseUrl.replace(/\/$/, '')}/api/auth/google/callback`;
+// For local development keep backend and client redirect URLs pointing to localhost by default.
+// You may override these with environment variables for different deployment targets.
+const backendBaseUrl = process.env.BACKEND_BASE_URL || 'http://localhost:3000';
+// Allow explicit override of the Google OAuth callback URL via env var to avoid
+// redirect_uri_mismatch errors during OAuth setup in Google Cloud Console.
+const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || `${backendBaseUrl.replace(/\/$/, '')}/api/auth/google/callback`;
 
 // Safety checks
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
@@ -30,6 +27,9 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
 if (!JWT_SECRET) {
   console.warn('[Passport] ⚠️ Missing JWT_SECRET');
 }
+
+// Helpful debug log so developers can verify the callback URL expected by Google
+console.log(`[Passport] Google callback URL: ${googleCallbackUrl}`);
 
 // Configure Google OAuth Strategy
 passport.use(
@@ -97,9 +97,6 @@ function issueJwtForUser(user) {
 module.exports = {
   passport,
   issueJwtForUser,
-  clientRedirectUrl:
-    CLIENT_REDIRECT_URL ||
-    (isProduction
-      ? 'https://gen-pay-eight.vercel.app'
-      : 'http://localhost:5173'),
+  // Default client redirect URL for local dev
+  clientRedirectUrl: CLIENT_REDIRECT_URL || 'http://localhost:5173',
 };

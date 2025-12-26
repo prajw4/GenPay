@@ -1,253 +1,437 @@
 import { useState, useEffect } from "react";
-// AppBar removed per request
-import { Users } from "../components/Users";
 import userService from '../services/userService'
+import txService from '../services/transactionService'
+import api from '../services/api'
 import { useNotify } from '../context/NotificationContext'
-import DashboardInsight from '../components/DashboardInsight' // new import for AI insight card
-import { Link } from 'react-router-dom'
+import DashboardInsight from '../components/DashboardInsight'
+import { Link, useNavigate } from 'react-router-dom'
 
-export const Dashboard = () =>{
-    const [balance, setBalance] = useState(0);
-    const [currentUser, setCurrentUser] = useState(null)
-    const [allUsers, setAllUsers] = useState([])
+export const Dashboard = () => {
+  const [balance, setBalance] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null)
+  const [allUsers, setAllUsers] = useState([])
+  const [recipients, setRecipients] = useState([])
+  const [recipientInput, setRecipientInput] = useState('')
+  const [debouncedRecipient, setDebouncedRecipient] = useState('')
+  const [transactions, setTransactions] = useState([])
+  const [frequentPage, setFrequentPage] = useState(0)
+  const { push } = useNotify()
+  const navigate = useNavigate()
 
-    // recipients: array of { name, user (found), message, amount, category }
-    const [recipients, setRecipients] = useState([])
-    const [recipientInput, setRecipientInput] = useState('')
-    const [transactions, setTransactions] = useState([])
-    const { push } = useNotify()
+  useEffect(() => {
+    async function init() {
+      try {
+        try {
+          const balRes = await api.get('/account/balance')
+          if (balRes?.data) {
+            setBalance(Number(balRes.data.balance) || 0)
+          }
+        } catch {}
 
-    useEffect(()=>{
-        // fetch balance and current user and users list
-        async function init(){
-            try{
-                // fetch balance (best-effort)
-                try{
-                    // API client will send cookies (JWT) with request
-                    const balRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/account/balance`, { credentials: 'include' })
-                    if(balRes.ok){
-                        const json = await balRes.json()
-                        setBalance(json.balance || 0)
-                    }
-                }catch(e){
-                    // ignore balance error
-                }
+        try {
+          const user = await userService.getCurrentUser()
+          setCurrentUser(user)
+        } catch {}
 
-                // fetch current user via service
-                try{
-                    const user = await userService.getCurrentUser()
-                    setCurrentUser(user)
-                }catch(e){
-                    console.warn('Failed to load current user', e)
-                }
+        try {
+          const list = await userService.list({})
+          const arr = list.user || list.users || (Array.isArray(list) ? list : [])
+          setAllUsers(arr)
+        } catch {}
 
-                // fetch users list to resolve recipient names
-                try{
-                    const list = await userService.list({})
-                    // list may be object with user/users
-                    const arr = list.user || list.users || (Array.isArray(list) ? list : [])
-                    // exclude current user once we know it
-                    setAllUsers(arr)
-                }catch(e){
-                    console.warn('Failed to load users list', e)
-                }
-            }catch(e){ console.error(e) }
-        }
-        init()
-    },[])
+        // Load recent transactions for dynamic dashboard stats
+        try {
+          const txs = await txService.list()
+          setTransactions(Array.isArray(txs) ? txs : [])
+        } catch {}
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    init()
+  }, [])
 
-    function initials(name){
-        if(!name) return ''
-        const parts = name.split(' ')
-        const first = parts[0]?.[0] || ''
-        const last = parts[1]?.[0] || (parts[0]?.[1] || '')
-        return (first + last).toUpperCase()
+  // Debounce recipient input (300ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedRecipient(recipientInput)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [recipientInput])
+
+  function initials(name) {
+    if (!name) return ''
+    const parts = name.split(' ')
+    return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase()
+  }
+
+  // Color palette for avatars (Tailwind classes)
+  const avatarColors = [
+    'bg-blue-100 text-blue-600',
+    'bg-purple-100 text-purple-600',
+    'bg-pink-100 text-pink-600',
+    'bg-green-100 text-green-600',
+    'bg-orange-100 text-orange-600',
+    'bg-teal-100 text-teal-600',
+  ]
+
+  // Get color for a user by index
+  function getUserColor(index) {
+    return avatarColors[index % avatarColors.length]
+  }
+
+  // Handle Send Money button click with debounced search
+  function handleSendMoneyClick() {
+    const name = debouncedRecipient.trim()
+    if (!name) {
+      push('Please enter a recipient name', 'error')
+      return
     }
 
-    function handleAddRecipient(){
-        const name = recipientInput.trim()
-        if(!name) return
-        // try to find user by firstName/lastName or username among visible users
-        const found = allUsers.find(u => {
-            const full = `${u.firstName || ''} ${u.lastName || ''}`.trim().toLowerCase()
-            return full === name.toLowerCase() || (u.username || '').toLowerCase() === name.toLowerCase() || (u.firstName || '').toLowerCase() === name.toLowerCase()
-        })
-        setRecipients(r => [...r, { name, user: found || null, message: '', amount: 100, category: 'Transfer' }])
-        setRecipientInput('')
+    const found = allUsers.find(u => {
+      const full = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase()
+      return full.toLowerCase() === name.toLowerCase()
+    })
+
+    if (!found) {
+      push('Recipient not found', 'error')
+      return
     }
 
-    function updateRecipient(index, changes){
-        setRecipients(rs => rs.map((r,i)=> i===index ? {...r, ...changes} : r))
+    // Redirect to SendMoney page with selected user
+    navigate(`/send?id=${found._id}&name=${encodeURIComponent(found.firstName + ' ' + found.lastName)}`)
+  }
+
+  // Get filtered users for search dropdown (by name prefix)
+  function getFilteredSearchUsers() {
+    const query = recipientInput.trim().toLowerCase()
+    if (!query) return []
+    
+    return allUsers
+      .filter(u => String(u._id) !== String(currentUser?._id))
+      .filter(u => {
+        const full = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase()
+        return full.startsWith(query)
+      })
+      .slice(0, 10)
+  }
+
+  // Handle selecting a user from dropdown
+  function selectUserFromDropdown(user) {
+    const fullName = `${user.firstName} ${user.lastName}`
+    setRecipientInput(fullName)
+    setDebouncedRecipient(fullName)
+  }
+
+  // Get paginated frequent recipients (6 per page in 3x2 grid)
+  function getPaginatedFrequentRecipients() {
+    const allFrequent = allUsers
+      .filter(u => String(u._id) !== String(currentUser?._id))
+      .slice(0, 6 + frequentPage * 6)
+    
+    const start = frequentPage * 6
+    const end = start + 6
+    return allFrequent.slice(start, end)
+  }
+
+  // Check if there are more frequent recipients to show
+  function hasMoreFrequentRecipients() {
+    const totalFrequent = allUsers.filter(u => String(u._id) !== String(currentUser?._id)).length
+    return totalFrequent > (frequentPage + 1) * 6
+  }
+
+  // 📊 Dashboard Stats
+  // 🔢 Daily aggregates (sent/received amounts, and count of successful transactions)
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0)
+  const todayEnd = new Date(); todayEnd.setHours(23,59,59,999)
+
+  const isToday = (d) => {
+    const dt = new Date(d)
+    return dt >= todayStart && dt <= todayEnd
+  }
+
+  const totalSent = transactions
+    .filter(t => t.status === 'Success' && isToday(t.date) && (t.fromUserId || t.from?._id) === currentUser?._id)
+    .reduce((s, t) => s + Number(t.amount || 0), 0)
+
+  const totalReceived = transactions
+    .filter(t => t.status === 'Success' && isToday(t.date) && (t.toUserId || t.to?._id) === currentUser?._id)
+    .reduce((s, t) => s + Number(t.amount || 0), 0)
+
+  const totalTransactions = transactions
+    .filter(t => t.status === 'Success' && isToday(t.date))
+    .length
+
+  function handleAddRecipient() {
+    const name = recipientInput.trim()
+    if (!name) return
+
+    const found = allUsers.find(u => {
+      const full = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase()
+      return full === name.toLowerCase()
+    })
+
+    setRecipients(r => [...r, { name, user: found || null, message: '', amount: 100, category: 'Transfer' }])
+    setRecipientInput('')
+  }
+
+  function updateRecipient(index, changes) {
+    setRecipients(rs => rs.map((r, i) => i === index ? { ...r, ...changes } : r))
+  }
+
+  async function sendToRecipient(index) {
+    const r = recipients[index]
+    if (!currentUser) return push('No current user', 'error')
+
+    const toUserId = r.user?._id
+    const amount = Number(r.amount) || 0
+
+    if (amount > balance) {
+      push('Insufficient balance', 'error')
+      return
     }
 
-    async function sendToRecipient(index){
-        const r = recipients[index]
-        if(!currentUser){ push('No current user loaded', 'error'); return }
-        const toUserId = r.user?._id || r.user?.id || null
-        const amount = Number(r.amount) || 0
-        // validate recipient is in users list
-        const isValidRecipient = allUsers.some(u => (u._id || u.id) === toUserId)
-        if(!isValidRecipient){ push('Invalid recipient selected', 'error'); return }
-
-        // sufficient balance check
-    if(amount > Number(balance)){ push('Insufficient balance', 'error'); setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Failed'} : item)); return }
-        const tx = {
-            fromUserId: currentUser._id || currentUser.id || null,
-            toUserId,
-            amount,
-            category: r.category || 'Transfer',
-            status: 'Pending',
-            message: r.message || '',
-            date: new Date().toISOString()
-        }
-
-        setTransactions(t => [tx, ...t])
-        push('Transaction queued', 'info')
-
-        // if recipient user is known, call backend transfer
-        if(toUserId){
-                try{
-                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/account/transfer`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to: toUserId, amount, category: r.category || 'Transfer', message: r.message || '' })
-                })
-                const data = await res.json()
-                if(!res.ok){
-                    push(data.message || 'Transfer failed', 'error')
-                    // mark last tx as failed
-                    setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Failed'} : item))
-                    return
-                }
-
-                // update balance from server response (ensure numeric)
-                if(data.balance !== undefined){
-                    const b = Number(data.balance)
-                    setBalance(isNaN(b) ? data.balance : b)
-                }
-
-                // defensive: re-fetch balance from server to ensure sync
-                try{
-                    const re = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/account/balance`, { credentials: 'include' })
-                    if(re.ok){
-                        const jb = await re.json()
-                        setBalance(Number(jb.balance) || jb.balance)
-                    }
-                }catch(e){
-                    console.warn('Failed to re-fetch balance', e)
-                }
-
-                // mark tx success
-                setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Success'} : item))
-                push('Transfer successful', 'success')
-            }catch(err){
-                console.error('Transfer error', err)
-                push('Transfer failed', 'error')
-                setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Failed'} : item))
-            }
-        }else{
-            // no user id, simulate local pending -> success
-            setTimeout(()=>{
-                setTransactions(prev => prev.map(item => item===tx ? {...item, status: 'Success'} : item))
-                push('Transaction completed (local)', 'success')
-            }, 1000)
-        }
+    const tx = {
+      fromUserId: currentUser._id,
+      toUserId,
+      amount,
+      category: r.category,
+      status: 'Pending',
+      date: new Date()
     }
 
-    return (
-        <div>
-            <div className="m-8 space-y-6">
-                <div className="bg-white rounded p-6 shadow flex items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center text-2xl font-bold">
-                            {initials((currentUser?.firstName || '') + ' ' + (currentUser?.lastName || ''))}
-                        </div>
-                        <div>
-                            <div className="text-2xl font-extrabold">{
-                                currentUser
-                                    ? `${
-                                        (currentUser.firstName || '').charAt(0).toUpperCase() + (currentUser.firstName || '').slice(1)
-                                      } ${
-                                        (currentUser.lastName || '').charAt(0).toUpperCase() + (currentUser.lastName || '').slice(1)
-                                      }`
-                                    : 'Guest'
-                            }</div>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-sm text-gray-500">Current Balance</div>
-                        <div className="text-3xl font-bold">₹{Number(balance).toLocaleString()}</div>
-                    </div>
-                </div>
+    setTransactions(t => [tx, ...t])
 
-                <div className="max-w-3xl">
-                    <DashboardInsight />
-                </div>
+    try {
+      const res = await api.post('/account/transfer', {
+        to: toUserId,
+        amount,
+        category: r.category,
+        message: r.message
+      })
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <Link to="/help" className="bg-white rounded p-6 shadow flex flex-col gap-2 hover:shadow-lg hover:bg-blue-50 transition">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-blue-500">Need a hand?</span>
-                        <span className="text-lg font-bold text-slate-900">Talk to the AI Help &amp; Support assistant</span>
-                        <span className="text-sm text-slate-600">Get immediate answers on adding money, tracking payments, and more.</span>
-                    </Link>
-                </div>
+      if (res?.data?.balance !== undefined) {
+        setBalance(Number(res.data.balance))
+      }
 
-                <div className="flex flex-col gap-6">
-                    <div className="bg-white rounded p-6 shadow min-h-[160px] w-full flex flex-col justify-center transition-all duration-200 hover:shadow-xl hover:bg-blue-50 cursor-pointer">
-                        <h4 className="text-base text-gray-500 font-medium mb-5">Send Money</h4>
-                        <div className="flex gap-2 mb-3">
-                            <input value={recipientInput} onChange={e=>setRecipientInput(e.target.value)} placeholder="Enter recipient name or email" className="flex-1 border p-2 rounded" />
-                            <button onClick={handleAddRecipient} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add</button>
-                        </div>
-                        <div>
-                            {recipients.length === 0 && <div className="text-sm text-gray-500">No recipients added yet.</div>}
-                            {recipients.map((r, idx) => (
-                                <div key={idx} className="border rounded p-3 mb-3">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="font-medium">{r.name} {r.user ? <span className="text-sm text-gray-500">({r.user.username})</span> : <span className="text-sm text-red-500">(not found)</span>}</div>
-                                        <div className="text-sm text-gray-500">Amount: ₹<input type="number" value={r.amount} onChange={e=> updateRecipient(idx, { amount: Number(e.target.value) })} className="w-24 inline-block ml-2 border rounded p-1" /></div>
-                                    </div>
-                                    <div className="mb-2 flex gap-2 items-center">
-                                        <input value={r.message} onChange={e=> updateRecipient(idx, { message: e.target.value })} placeholder="Message (what is this for?)" className="flex-1 border p-2 rounded min-w-0" />
-                                        <select value={r.category || ''} onChange={e=> updateRecipient(idx, { category: e.target.value })} className="border p-2 rounded w-36 min-w-0 max-w-full overflow-ellipsis">
-                                            <option value="" disabled>Select type</option>
-                                            <option value="Transfer">Transfer</option>
-                                            <option value="Food">Food</option>
-                                            <option value="Bills">Bills</option>
-                                            <option value="Recharge">Recharge</option>
-                                        </select>
-                                    </div>
-                                    <div className="flex justify-end mt-2">
-                                        <button
-                                            onClick={() => {
-                                                if (!r.category || r.category === "") {
-                                                    push('Please select a transfer type/category', 'error');
-                                                    return;
-                                                }
-                                                sendToRecipient(idx);
-                                            }}
-                                            className={`px-3 py-2 bg-green-600 text-white rounded transition-opacity ${!r.category || r.category === '' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            disabled={!r.category || r.category === ''}
-                                        >
-                                            Send Money
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+      setTransactions(prev =>
+        prev.map(item => item === tx ? { ...item, status: 'Success' } : item)
+      )
+      push('Transfer successful', 'success')
+    } catch {
+      setTransactions(prev =>
+        prev.map(item => item === tx ? { ...item, status: 'Failed' } : item)
+      )
+      push('Transfer failed', 'error')
+    }
+  }
 
-                    <div className="bg-white rounded p-6 shadow w-full">
-                        <h4 className="text-base text-gray-500 font-medium mb-4">People</h4>
-                        <Users excludeUserId={currentUser?._id} onSelectUser={(user) => {
-                            const already = recipients.find(r => r.user && (r.user._id === user._id))
-                            if(already){ push('Recipient already added', 'info'); return }
-                            setRecipients(r => [...r, { name: `${user.firstName} ${user.lastName}`.trim(), user, message: '', amount: 100 }])
-                        }} />
-                    </div>
-                </div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+
+        {/* 🔝 BALANCE HERO */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center text-xl font-bold text-blue-600">
+              {initials(`${currentUser?.firstName} ${currentUser?.lastName}`)}
             </div>
+            <div className="flex-1">
+              <div className="text-lg font-semibold text-gray-900">
+                {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Guest'}
+              </div>
+              <div className="text-sm text-gray-500">Welcome back 👋</div>
+            </div>
+          </div>
+
+          <div className="bg-blue-600 rounded-lg p-4 mb-5">
+            <div className="text-sm text-blue-100">Available Balance</div>
+            <div className="text-3xl font-bold text-white">
+              ₹{balance.toLocaleString('en-IN')}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-gray-50 rounded-lg p-3 text-center">
+              <div className="text-xs text-gray-500 mb-1">Sent</div>
+              <div className="font-semibold text-red-600">₹{totalSent.toLocaleString('en-IN')}</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 text-center">
+              <div className="text-xs text-gray-500 mb-1">Received</div>
+              <div className="font-semibold text-green-600">₹{totalReceived.toLocaleString('en-IN')}</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 text-center">
+              <div className="text-xs text-gray-500 mb-1">Transactions</div>
+              <div className="font-semibold text-gray-800">{totalTransactions}</div>
+            </div>
+          </div>
         </div>
-    )
+
+        {/* 🤖 AI INSIGHT */}
+        <DashboardInsight />
+
+        {/* 🧠 HELP */}
+        <Link 
+          to="/help" 
+          className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+        >
+          <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">
+            🤖
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">AI Help & Support</h3>
+            <p className="text-sm text-gray-500">Ask GenPay about your spending & payments</p>
+          </div>
+          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+
+        {/* 💸 SEND MONEY */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="text-lg">💸</span> Send Money
+          </h4>
+
+          <div className="flex gap-2 mb-4 relative">
+            <div className="flex-1 relative">
+              <input
+                value={recipientInput}
+                onChange={e => setRecipientInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSendMoneyClick()}
+                placeholder="Enter recipient name"
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                autoComplete="off"
+              />
+              
+              {/* Search Dropdown */}
+              {recipientInput && getFilteredSearchUsers().length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                  {getFilteredSearchUsers().map(user => (
+                    <button
+                      key={user._id}
+                      onClick={() => selectUserFromDropdown(user)}
+                      className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-left transition-colors"
+                      type="button"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center font-medium text-blue-600 flex-shrink-0 text-xs">
+                        {initials(`${user.firstName} ${user.lastName}`)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900 text-sm">{user.firstName} {user.lastName}</div>
+                        <div className="text-xs text-gray-500">@{user.username}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <button 
+              onClick={handleSendMoneyClick}
+              className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-medium transition-colors"
+            >
+              Send Money
+            </button>
+          </div>
+
+          {recipients.map((r, i) => (
+            <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3">
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center font-medium text-blue-600">
+                    {initials(r.name)}
+                  </div>
+                  <span className="font-semibold text-gray-900">{r.name}</span>
+                </div>
+                <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-300 px-2">
+                  <span className="text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    value={r.amount}
+                    onChange={e => updateRecipient(i, { amount: e.target.value })}
+                    className="w-20 py-2 bg-transparent text-gray-900 focus:outline-none text-right font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 mb-3">
+                <input
+                  placeholder="Add a message (optional)"
+                  value={r.message}
+                  onChange={e => updateRecipient(i, { message: e.target.value })}
+                  className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <select
+                  value={r.category}
+                  onChange={e => updateRecipient(i, { category: e.target.value })}
+                  className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option>Transfer</option>
+                  <option>Food</option>
+                  <option>Bills</option>
+                </select>
+              </div>
+
+              <button
+                onClick={() => sendToRecipient(i)}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"
+              >
+                Send ₹{Number(r.amount).toLocaleString('en-IN')}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* 👥 PEOPLE */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="text-lg">👥</span> Frequent Recipients
+          </h4>
+          
+          {/* 3x2 Grid Layout */}
+          <div className="grid grid-cols-3 gap-8 mb-4">
+            {getPaginatedFrequentRecipients().map((user, index) => (
+              <button
+                key={user._id}
+                onClick={() => {
+                  navigate(`/send?id=${user._id}&name=${encodeURIComponent(user.firstName + ' ' + user.lastName)}`)
+                }}
+                className="flex flex-col items-center gap-2 group"
+              >
+                <div className={`h-14 w-14 rounded-full flex items-center justify-center font-semibold text-sm group-hover:shadow-md transition-shadow ${getUserColor(frequentPage * 6 + index)}`}>
+                  {initials(`${user.firstName} ${user.lastName}`)}
+                </div>
+                <span className="text-xs font-medium text-gray-700 text-center max-w-[60px] truncate group-hover:text-gray-900">
+                  {user.firstName}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* More Button */}
+          {hasMoreFrequentRecipients() && (
+            <button
+              onClick={() => setFrequentPage(frequentPage + 1)}
+              className="w-full py-2 px-4 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              More Recipients →
+            </button>
+          )}
+
+          {/* Back Button (show if on page 2+) */}
+          {frequentPage > 0 && (
+            <button
+              onClick={() => setFrequentPage(frequentPage - 1)}
+              className="w-full py-2 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              ← Show Fewer
+            </button>
+          )}
+        </div>
+
+      </div>
+    </div>
+  )
 }

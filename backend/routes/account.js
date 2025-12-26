@@ -17,7 +17,7 @@ router.get("/balance", authMiddleware, async (req, res) => {
 
 router.post("/transfer", authMiddleware, async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
+    await session.startTransaction();
     const { amount, to, category = 'Transfer', message = '' } = req.body;
 
     try {
@@ -103,7 +103,10 @@ router.post("/transfer", authMiddleware, async (req, res) => {
             console.error('Failed to record failed transaction', e.message || e);
         }
 
-        console.error('Transfer error', err && err.message ? err.message : err);
+        console.error('Transfer error:', err && err.message ? err.message : err);
+        if (err && err.stack) {
+            console.error('Stack trace:', err.stack);
+        }
         return res.status(500).json({ message: 'Transfer failed' });
     }
 });

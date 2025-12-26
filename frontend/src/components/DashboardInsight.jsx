@@ -46,54 +46,61 @@ export default function DashboardInsight() {
   );
 
   return (
-  <div className="bg-white rounded p-6 shadow w-full min-h-[200px] max-h-[260px] flex flex-col gap-1 transition-shadow duration-200 hover:shadow-lg">
-      <h3 className="text-gray-700 font-semibold flex items-center gap-2">
-        💡 Your AI Expense Insight
-      </h3>
-      <div className="relative flex-1 min-h-[72px]">
-        <div className={`text-gray-600 text-sm transition-all duration-200 pr-1 ${expanded ? 'max-h-[140px] overflow-y-auto' : 'max-h-[60px] overflow-hidden'}`}>
-          {loading ? 'Loading...' : insight}
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 w-full min-h-[200px] max-h-[280px] flex flex-col gap-3 transition-shadow duration-200 hover:shadow-md">
+      <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+        <span className="text-lg">💡</span>
+        <h3 className="text-slate-800 font-semibold text-sm">AI Expense Insight</h3>
+      </div>
+
+      <div className="relative flex-1 min-h-[56px]">
+        <div className={`text-slate-600 text-sm leading-relaxed transition-all duration-200 pr-1 ${expanded ? 'max-h-[120px] overflow-y-auto' : 'max-h-[48px] overflow-hidden'}`}>
+          {loading ? (
+            <span className="text-slate-400 animate-pulse">Analyzing your spending...</span>
+          ) : (
+            insight
+          )}
         </div>
         {!expanded && !loading && insight && insight.length > 0 && (
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none" />
         )}
       </div>
+
       {!loading && insight && insight.length > 0 && (
         <button
           onClick={() => setExpanded(prev => !prev)}
-          className="self-start text-xs font-medium text-blue-600 hover:text-blue-700"
+          className="self-start text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
         >
           {expanded ? 'Show less' : 'Show more'}
         </button>
       )}
 
       {stats && (
-        <div className="space-y-0.5">
+        <div className="space-y-2 pt-2 border-t border-slate-100">
           {/* Daily */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium w-12">Daily</span>
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-500 h-2 rounded-full transition-all" style={{ width: getBarWidth(stats.daily.total, maxTotal) }}></div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-slate-500 w-14">Daily</span>
+            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: getBarWidth(stats.daily.total, maxTotal) }}></div>
             </div>
-            <span className="text-xs font-medium w-16 text-right">₹{stats.daily.total}</span>
+            <span className="text-xs font-semibold text-slate-700 w-16 text-right tabular-nums">₹{stats.daily.total.toLocaleString()}</span>
           </div>
 
           {/* Weekly */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium w-12">Weekly</span>
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div className="bg-green-500 h-2 rounded-full transition-all" style={{ width: getBarWidth(stats.weekly.total, maxTotal) }}></div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-slate-500 w-14">Weekly</span>
+            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div className="bg-emerald-500 h-2 rounded-full transition-all duration-300" style={{ width: getBarWidth(stats.weekly.total, maxTotal) }}></div>
             </div>
-            <span className="text-xs font-medium w-16 text-right">₹{stats.weekly.total}</span>
+            <span className="text-xs font-semibold text-slate-700 w-16 text-right tabular-nums">₹{stats.weekly.total.toLocaleString()}</span>
           </div>
 
           {/* Monthly */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium w-12">Monthly</span>
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div className="bg-purple-500 h-2 rounded-full transition-all" style={{ width: getBarWidth(stats.monthly.total, maxTotal) }}></div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-slate-500 w-14">Monthly</span>
+            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div className="bg-violet-500 h-2 rounded-full transition-all duration-300" style={{ width: getBarWidth(stats.monthly.total, maxTotal) }}></div>
             </div>
-            <span className="text-xs font-medium w-16 text-right">₹{stats.monthly.total}</span>
+            <span className="text-xs font-semibold text-slate-700 w-16 text-right tabular-nums">₹{stats.monthly.total.toLocaleString()}</span>
           </div>
         </div>
       )}
