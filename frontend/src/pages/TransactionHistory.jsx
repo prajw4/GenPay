@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import transactionService from '../services/transactionService'
 import { useUser } from '../context/UserContext'
 import { getCategoryIcon } from '../utils/categoryIcons'
 
@@ -29,6 +30,10 @@ function formatTransactionDateTime(date) {
 
 export default function TransactionHistory() {
   const [transactions, setTransactions] = useState([])
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [total, setTotal] = useState(0)
+  const [listLoading, setListLoading] = useState(false)
   const { user } = useUser()
 
   const [prompt, setPrompt] = useState('')
@@ -57,17 +62,21 @@ export default function TransactionHistory() {
   useEffect(() => {
     let mounted = true
     async function load() {
+      setListLoading(true)
       try {
-        const res = await api.get('/transactions')
+        const res = await transactionService.list({ page, pageSize })
         if (!mounted) return
-        setTransactions(res.data.transactions || [])
+        setTransactions(res.transactions || [])
+        setTotal(res.total || 0)
       } catch (e) {
         console.error('Failed to load transactions', e)
+      } finally {
+        setListLoading(false)
       }
     }
     load()
     return () => { mounted = false }
-  }, [])
+  }, [page, pageSize])
 
   return (
     <div className="min-h-screen bg-slate-50 pt-20 pb-10">
@@ -185,7 +194,11 @@ export default function TransactionHistory() {
         </div>
 
         {/* --- Transaction List --- */}
-        {transactions.length === 0 ? (
+        {listLoading && transactions.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm py-10 text-center text-slate-400">
+            Loading transactions...
+          </div>
+        ) : transactions.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm py-20 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-50 flex items-center justify-center">
               <svg className="w-7 h-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,6 +267,31 @@ export default function TransactionHistory() {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {transactions.length > 0 && (
+          <div className="flex items-center justify-between mt-4 text-xs text-slate-500">
+            <span>
+              Showing {(page - 1) * pageSize + 1}–{(page - 1) * pageSize + transactions.length} of {total}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || listLoading}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={listLoading || (page * pageSize >= total)}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
         

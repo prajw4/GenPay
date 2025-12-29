@@ -60,7 +60,7 @@ const frontendDistPath = path.join(__dirname, "../frontend/dist");
 
 app.use(express.static(frontendDistPath));
 
-// ✅ EXPRESS 5 SAFE SPA FALLBACK (THIS IS THE KEY FIX)
+
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(frontendDistPath, "index.html"));
 });

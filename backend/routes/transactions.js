@@ -42,13 +42,22 @@ router.post('/', authMiddleware, async (req, res) => {
 
 // optional: list transactions for current user (from or to)
 router.get('/', authMiddleware, async (req, res) => {
-    const {limit , offset} = req.query
+    // pagination params with sane defaults and caps
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+
+    const filter = { $or: [ { fromUserId: req.userId }, { toUserId: req.userId } ] };
+
     try {
-        const txs = await Transaction.find({
-            $or: [ { fromUserId: req.userId }, { toUserId: req.userId } ]
-        }).sort({ date: -1 }).limit(200)
-        .populate({ path: 'fromUserId', select: 'firstName lastName username' })
-        .populate({ path: 'toUserId', select: 'firstName lastName username' });
+        const [total, txs] = await Promise.all([
+            Transaction.countDocuments(filter),
+            Transaction.find(filter)
+                .sort({ date: -1 })
+                .skip(offset)
+                .limit(limit)
+                .populate({ path: 'fromUserId', select: 'firstName lastName username' })
+                .populate({ path: 'toUserId', select: 'firstName lastName username' })
+        ]);
 
         // map populated docs to friendly structure
         const normalized = txs.map(t => ({
@@ -60,9 +69,15 @@ router.get('/', authMiddleware, async (req, res) => {
             date: t.date,
             from: t.fromUserId ? { _id: t.fromUserId._id, firstName: t.fromUserId.firstName, lastName: t.fromUserId.lastName, username: t.fromUserId.username } : null,
             to: t.toUserId ? { _id: t.toUserId._id, firstName: t.toUserId.firstName, lastName: t.toUserId.lastName, username: t.toUserId.username } : null,
-        }))
+        }));
 
-        res.json({ transactions: normalized });
+        res.json({
+            transactions: normalized,
+            total,
+            limit,
+            offset,
+            hasMore: offset + normalized.length < total
+        });
     } catch (err) {
         console.error('Failed to list transactions', err.message || err);
         res.status(500).json({ message: 'Failed to list transactions' });

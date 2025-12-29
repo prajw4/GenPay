@@ -87,7 +87,7 @@ router.post("/transfer", authMiddleware, async (req, res) => {
         try { await session.abortTransaction(); } catch (e) {}
         session.endSession();
 
-        // attempt to save failed transaction (best-effort)
+        // attempt to save failed transaction
         try {
             await Transaction.create({
                 fromUserId: req.userId,
@@ -99,7 +99,7 @@ router.post("/transfer", authMiddleware, async (req, res) => {
                 date: new Date()
             });
         } catch (e) {
-            // swallow - auditing best-effort
+            
             console.error('Failed to record failed transaction', e.message || e);
         }
 
