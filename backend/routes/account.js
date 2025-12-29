@@ -4,6 +4,7 @@ const { Account, Transaction } = require("../database/db")
 const {default: mongoose} = require('mongoose');
 
 const router = express.Router();
+const { generateAndStoreInsight } = require('../services/InsightService');
 
 router.get("/balance", authMiddleware, async (req, res) => {
     const account = await Account.findOne({
@@ -76,6 +77,11 @@ router.post("/transfer", authMiddleware, async (req, res) => {
         const updatedSender = await Account.findOne({ userId: req.userId });
         const updatedReceiver = await Account.findOne({ userId: to });
         console.log(`Transfer successful: from ${req.userId} to ${to} amount=${numericAmount} newBalance=${updatedSender.balance} rxNewBalance=${updatedReceiver.balance} txId=${tx[0]._id}`);
+        // trigger async AI insight cache regeneration (fire-and-forget)
+        Promise.resolve().then(() => generateAndStoreInsight(req.userId)).catch((e) => {
+            console.error('Insight generation failed (non-blocking):', e && e.message ? e.message : e)
+        })
+
         res.json({
             message: "Transfer successful",
             balance: updatedSender.balance,

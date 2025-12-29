@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const {Transaction} = require('../database/db'); // adjust path if needed
+const { Transaction, InsightCache } = require('../database/db');
+const { askGemini } = require('../services/GeminiService');
 
 // --- Helper functions for date ranges ---
 function startOfDay(d) {
@@ -158,3 +159,47 @@ module.exports = {
   getMonthlyStats,
   buildDashboardStats
 };
+
+// --- Build AI prompt from stats ---
+function buildDashboardPrompt(stats) {
+  const { daily, weekly, monthly } = stats;
+
+  const dailyTopCategories = (daily.topCategories || []).map(c => `${c.category} (₹${c.total})`).join(', ') || 'None';
+  const weeklyTopCategories = (weekly.topCategories || []).map(c => `${c.category} (₹${c.total})`).join(', ') || 'None';
+  const monthlyTopCategories = (monthly.topCategories || []).map(c => `${c.category} (₹${c.total})`).join(', ') || 'None';
+  const monthlyTopReceivers = (monthly.topReceivers || []).map(r => `${r.receiverId} (₹${r.total})`).join(', ') || 'None';
+
+  return `
+Daily: total = ₹${daily.total}, count = ${daily.count}, top categories: ${dailyTopCategories}.
+Weekly: total = ₹${weekly.total}, count = ${weekly.count}, top categories: ${weeklyTopCategories}, compared to last week diff: ₹${weekly.diff}.
+Monthly: total = ₹${monthly.total}, top categories: ${monthlyTopCategories}, top receivers: ${monthlyTopReceivers}.
+
+Generate a friendly 2–3 line summary for the user’s spending pattern.
+Include ⚠️ emoji if daily total exceeds ₹1000. Keep it simple and friendly.
+`;
+}
+
+// --- Generate and store insight cache for a user ---
+async function generateAndStoreInsight(userId) {
+  const stats = await buildDashboardStats(userId);
+  let insightText;
+  try {
+    const prompt = buildDashboardPrompt(stats);
+    insightText = await askGemini(prompt);
+    insightText = (insightText || '').trim();
+  } catch (err) {
+    insightText = '';
+  }
+  if (!insightText || insightText.startsWith('Sorry, something went wrong') || insightText.includes('AI insights are unavailable')) {
+    insightText = `Summary: Today you spent ₹${stats.daily.total}. This week: ₹${stats.weekly.total}. This month: ₹${stats.monthly.total}.`;
+  }
+
+  await InsightCache.updateOne(
+    { userId },
+    { $set: { insightText, statsSnapshot: stats, updatedAt: new Date() } },
+    { upsert: true }
+  );
+}
+
+module.exports.buildDashboardPrompt = buildDashboardPrompt;
+module.exports.generateAndStoreInsight = generateAndStoreInsight;

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {authMiddleware} = require('../middlewares'); // your auth middleware
 const { buildDashboardStats } = require('../services/InsightService'); // our new service
-const { askGemini } = require('../services/GeminiService'); // destructure function safely
+const { InsightCache } = require('../database/db');
 
 // --- Helper: build AI prompt ---
 function buildDashboardPrompt(stats) {
@@ -27,35 +27,21 @@ Include ⚠️ emoji if daily total exceeds ₹1000. Keep it simple and friendly
 router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
-    console.log("User ID from token:", userId); // from auth middleware
 
-    // 1️⃣ Fetch stats
+    // Serve cached insight if available; do NOT call AI here
+    const cache = await InsightCache.findOne({ userId }).lean();
+    if (cache) {
+      return res.json({
+        insightText: cache.insightText,
+        stats: cache.statsSnapshot,
+        updatedAt: cache.updatedAt
+      });
+    }
+
+    // If no cache yet, return deterministic summary based on current stats (no AI call)
     const stats = await buildDashboardStats(userId);
-
-    // 2️⃣ Build AI prompt
-    const prompt = buildDashboardPrompt(stats);
-
-    // 3️⃣ Call Gemini AI safely
-    let insightText;
-    try {
-      insightText = await askGemini(prompt); // call the function directly
-      insightText = insightText.trim();
-    } catch (err) {
-      console.error('Gemini AI failed:', err);
-      // fallback deterministic summary
-      insightText = `Summary: Today you spent ₹${stats.daily.total}. This week: ₹${stats.weekly.total}. This month: ₹${stats.monthly.total}.`;
-    }
-
-    // If Gemini returned a generic error message, fallback to deterministic summary
-    if (!insightText || insightText.startsWith('Sorry, something went wrong') || insightText.includes('AI insights are unavailable')) {
-      insightText = `Summary: Today you spent ₹${stats.daily.total}. This week: ₹${stats.weekly.total}. This month: ₹${stats.monthly.total}.`;
-    }
-
-    // 4️⃣ Return response
-    res.json({
-      insightText,
-      stats
-    });
+    const fallbackText = `Summary: Today you spent ₹${stats.daily.total}. This week: ₹${stats.weekly.total}. This month: ₹${stats.monthly.total}.`;
+    res.json({ insightText: fallbackText, stats, updatedAt: null });
 
   } catch (err) {
     console.error('Dashboard insight error:', err);

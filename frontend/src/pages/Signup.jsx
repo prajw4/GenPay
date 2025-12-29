@@ -41,7 +41,7 @@ export const Signup = () => {
                                 <label className="text-sm font-medium text-slate-700">First Name</label>
                                 <input
                                     type="text"
-                                    placeholder="Harsh"
+                                    placeholder="Prajwal"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all"
@@ -51,7 +51,7 @@ export const Signup = () => {
                                 <label className="text-sm font-medium text-slate-700">Last Name</label>
                                 <input
                                     type="text"
-                                    placeholder="Patil"
+                                    placeholder="Kadam"
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all"

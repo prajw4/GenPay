@@ -143,3 +143,34 @@ module.exports = {
     Transaction,
     Faq
 }
+
+// --- Insight Cache (per-user cached AI insight + stats snapshot) ---
+const insightCacheSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: true },
+    insightText: { type: String, required: true },
+    statsSnapshot: {
+        daily: {
+            total: Number,
+            count: Number,
+            topCategories: [{ category: String, total: Number }]
+        },
+        weekly: {
+            total: Number,
+            count: Number,
+            topCategories: [{ category: String, total: Number }],
+            prevTotal: Number,
+            diff: Number
+        },
+        monthly: {
+            total: Number,
+            count: Number,
+            topCategories: [{ category: String, total: Number }],
+            topReceivers: [{ receiverId: mongoose.Schema.Types.ObjectId, total: Number, count: Number }]
+        }
+    },
+    updatedAt: { type: Date, default: Date.now }
+}, { timestamps: false });
+
+const InsightCache = mongoose.model('InsightCache', insightCacheSchema);
+
+module.exports.InsightCache = InsightCache;
