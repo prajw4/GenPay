@@ -41,8 +41,8 @@ export const Dashboard = () => {
 
         // Load recent transactions for dynamic dashboard stats
         try {
-          const txs = await txService.list()
-          setTransactions(Array.isArray(txs) ? txs : [])
+          const res = await txService.list({ page: 1, pageSize: 50 })
+          setTransactions(res?.transactions || [])
         } catch {}
       } catch (e) {
         console.error(e)
